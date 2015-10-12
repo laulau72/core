@@ -1388,7 +1388,7 @@ function infofctmenu
 	if [[ -z "$DIALOG" ]]
 	then
    		headermenu "$MENUNAME \n"
-        	echo $ALLINFO
+        	echo "$ALLINFO"
 		press_return
 	else
 		W=$(( $(echo "$ALLINFO" |wc -L) + 5 ))
