@@ -1047,6 +1047,11 @@ $FULLDEBUG
         if [ "$response" = "n" ] ; then
             return 1
         fi
+      elif [[ "$DIALOG" = "KDE" ]]
+      then
+	      prompt="$*"
+	      kdialog --yesno "$prompt"
+	      return $?
       else
 	      prompt="$*"
 	      H=5
@@ -1294,15 +1299,9 @@ function selectfctmenu {
 				i=$(( $i + 1 ))
 			done
 		fi
-		if [[ "$Extraoption" = "yes" ]]
-		then
-			option="--extra-button --extra-label $EXTRANAME"
-		else
-			option=""
-		fi
 		Hmax=20
 		H=$(( ${#FCTTABLE[*]} + 8 + $(echo "$MENUNAME" |wc -l) )) 
-		W=30
+		W=40
 		T=${#FCTTABLE[*]}
 		if [[ $H -gt $(( $Hmax + 8)) ]]
 		then
@@ -1310,8 +1309,21 @@ function selectfctmenu {
 			T=$Hmax
 		fi
 		menuout=/tmp/menu.$$
-		dialog $option $menutype "$MENUNAME" $H $W $T $OPTFCT 2>$menuout
-		case $? in
+		if [[ "$DIALOG" = "KDE" ]]
+		then
+		   kdialog  $menutype "$MENUNAME" $OPTFCT >$menuout
+		   rc=$?
+		else
+		   if [[ "$Extraoption" = "yes" ]]
+		   then
+		   	   option="--extra-button --extra-label $EXTRANAME"
+		   else
+			   option=""
+		   fi
+		   dialog $option $menutype "$MENUNAME" $H $W $T $OPTFCT 2>$menuout
+		   rc=$?
+	        fi
+		case $rc in
 			0)
 				CHOICEFCT=""
 				RES=$(cat $menuout)
@@ -1360,6 +1372,12 @@ function readfctmenu
 	then
 		echo -n $Question
 		read CHOICEFCT
+	elif [[ "$DIALOG" = "KDE" ]]
+	then
+		tmpfile=/tmp/read.$$
+		kdialog --inputbox "$Question" $H $W > $tmpfile
+		CHOICEFCT=$(cat $tmpfile)
+		rm $tmpfile
 	else
 		W=$(( $(echo $Question |wc -c) + 20))
 		H=10
@@ -1384,16 +1402,19 @@ function infofctmenu
                	esac
         done
 	shift $nshift
-        ALLINFO="$*"
+	ALLINFO="$@"
 	if [[ -z "$DIALOG" ]]
 	then
    		headermenu "$MENUNAME \n"
         	echo "$ALLINFO"
 		press_return
+	elif [[ "$DIALOG" = "KDE" ]]
+	then
+		kdialog --msgbox "${ALLINFO}"
 	else
 		W=$(( $(echo "$ALLINFO" |wc -L) + 5 ))
 		H=$(( $(echo "$ALLINFO" |wc -l) + 5 ))
-		dialog "$dialogopt" "$MENUNAME" --msgbox "$ALLINFO" $H $W
+		dialog "$dialogopt" "$MENUNAME" --msgbox "${ALLINFO}" $H $W
 	fi
 }
 
@@ -1597,6 +1618,12 @@ function readpwd
 		stty -echo
                 read PASSWD
                 stty echo
+	elif [[ "$DIALOG" = "KDE" ]]
+	then
+		tmpfile=/tmp/pwd-$$
+		kdialog --password "$text" >$tmpfile
+	        PASSWD=$(cat $tmpfile)
+	        rm $tmpfile
 	else
 		tmpfile=/tmp/pwd-$$
 		H=10
