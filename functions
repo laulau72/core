@@ -54,7 +54,36 @@ $FULLDEBUG
 
 }
 
-# Output format messages in VARFACTORY_LOG (/var/factory/logs) function: msgprefix
+
+
+
+#### Log functions
+##
+## Function group Description
+##
+##---
+
+
+
+##### msgprefix
+##
+## Output format messages depending of the varible setting (see input)
+##
+###### Input:
+##
+## * $FACTORY_NOMSGPREFIX
+## * $FACTORY_LOGFULLDATE
+## * $FACTORY_LOGPROGNAME
+## * $FACTORY_LOGPID
+## * $FACTORY_LOGHOSTNAME
+## * $FACTORY_LOGUSER
+##
+###### Ouput:
+##
+## * 
+##
+##---
+
 
 function msgprefix
 {
@@ -105,9 +134,23 @@ $FULLDEBUG
 }
 
 
-
-
-# Activate the log information in VARFACTORY_LOG (/var/factory/log) function: loginfo followed the output format function
+##### loginfo
+##
+## Activate the log information in VARFACTORY_LOG (/var/factory/log) and on the screen 
+##
+###### Input:
+##
+## * Comment to be written in the log
+##
+###### Ouput:
+##
+## * Entry is added in $FACTORY_LOGFILE with the I: prefix
+##
+###### Exemple:
+##
+## *  I: 12:46:58 Starting Centreon Core
+##
+##---
 
 function loginfo
 {
@@ -121,7 +164,24 @@ $FULLDEBUG
 	fi
 }
 
-# Activate the log information in VARFACTORY_LOG (/var/factory/log) function: logtolog followed the output format function only to log
+##### logtolog
+##
+## Activate the log information in VARFACTORY_LOG (/var/factory/log)
+##
+###### Input:
+##
+## * Comment to be written in the log
+##
+###### Ouput:
+##
+## * Entry is added in $FACTORY_LOGFILE with the I: prefix
+##
+###### Exemple:
+##
+## *  L: 12:46:58 Starting Centreon Core
+##
+##---
+
 function logtolog
 {
 $FULLDEBUG
@@ -129,7 +189,19 @@ $FULLDEBUG
 	$ECHOCMD L: $FACTORY_MSGPREFIX "$*" >> $FACTORY_LOGFILE
 }
 
-# Append log contents followed the informations level E as Error, I as Info, W as Warning, D as Debug function: logfromfile to the factory log (/var/factory/log)
+##### logfromfile
+##
+##  Append log contents followed the informations level E as Error, I as Info, W as Warning, D as Debug function: logfromfile to the factory log (/var/factory/log)
+##
+###### Input:
+##
+## * Comment to be written in the log
+##
+###### Ouput:
+##
+## * Entry is added in $FACTORY_LOGFILE with the I: prefix
+##
+##---
 
 function logfromfile
 {
@@ -157,7 +229,24 @@ $FULLDEBUG
 	done
 }
 
-# Transform any log line in level warning W function: logwarn
+##### logwarn
+##
+## Transform any log line in level warning W
+##
+###### Input:
+##
+## * Comment to be written in the log
+##
+###### Ouput:
+##
+## * Entry is added in $FACTORY_LOGFILE with the W: prefix
+##
+###### Exemple:
+##
+## *  W: 12:46:58 Centreon Core is already started
+##
+##---
+
 function logwarn
 {
 $FULLDEBUG
@@ -172,8 +261,23 @@ $FULLDEBUG
 
 
 
-# 
-# Transform any log line in level warning E function: logerror
+##### logerror
+##
+## Transform any log line in level error E
+##
+###### Input:
+##
+## * Comment to be written in the log
+##
+###### Ouput:
+##
+## * Entry is added in $FACTORY_LOGFILE with the E: prefix
+##
+###### Exemple:
+##
+## *  E: 12:46:58 Centreon Core is not running
+##
+##---
 
 function logerror
 {
@@ -189,7 +293,23 @@ $FULLDEBUG
 }
 
 
-# Transform any log line in level warning D function: logdebug
+##### logdebug
+##
+## Transform any log line in level debug D
+##
+###### Input:
+##
+## * Comment to be written in the log
+##
+###### Ouput:
+##
+## * Entry is added in $FACTORY_LOGFILE with the D: prefix
+##
+###### Exemple:
+##
+## *  D: 12:46:58 Centreon Core is started
+##
+##---
 
 function logdebug
 {
@@ -203,7 +323,26 @@ $FULLDEBUG
 	fi
 }
 
-# Exit in fatal error messages function: fatalerror
+##### fatalerror
+##
+## Transform any log line in level error E and exit
+##
+###### Input:
+##
+## * exit code
+## * Comment to be written in the log
+##
+###### Ouput:
+##
+## * Entry is added in $FACTORY_LOGFILE with the E: prefix
+## * exit $1
+##
+###### Exemple:
+##
+## *  E: 12:46:58 Failed to start Centreon
+##
+##---
+
 function fatalerror
 {
 $FULLDEBUG
@@ -1854,9 +1993,25 @@ user_fullname=`finger -m ${user_muid}|grep "In real life"|sed 's/.*life: //'`
 echo "${user_muid} : ${user_fullname}"
 }
 
-#
-# Init part, run only once
-#
+##### Init
+##
+## Init part, run only once
+## This will set some usefull variable
+##
+###### Ouput:
+##
+## * FACTORY_PLATFORM
+## * ECHOCMD
+## * FACTORY_DISTRIB
+## * HOSTNAME
+## * SHORTHOSTNAME
+## * PROGNAME
+## * FACTORY_TMPDIR
+## * FACTORY_TMPFILES
+## * FACTORY_SUDO
+##
+##---
+
 export FACTORY_PLATFORM=`uname`
 case $FACTORY_PLATFORM in 
 	CYGWIN*)
