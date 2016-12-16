@@ -1,0 +1,327 @@
+#!/bin/ksh
+#
+# Function: headermenu
+#       - Display a simple header.
+#       - Use option 1 for title.
+#       - Use option 2 for display a current selection message.
+function headermenu {
+$FULLDEBUG
+        print
+        print "==========================================="
+        print "\t$1"
+        if [[ ! -z "$2" ]]
+        then
+                print "\tCurrent selection : $2"
+        fi
+        print "==========================================="
+        print
+}
+# Function: selectfctmenuold
+#       - Simple function to display a menu using "select" command.
+#       - Display header before menu selection.
+#       - Remind current selection if used with option "S".
+function selectfctmenuold {
+$FULLDEBUG
+	# set fix colums number to try to adap big menu list
+	export COLUMNS=155
+        clear
+        EXITOPT="Exit"
+        RETURNOPT=""
+        CURRENT_SELECTION=""
+	nshift=0
+        while getopts ":erS:" opt
+        do
+                case $opt in
+                        e)      EXITOPT=""
+                                nshift=`expr $nshift + 1 ` ;;
+                        r)      RETURNOPT="Return"
+                                nshift=`expr $nshift + 1 ` ;;
+                        S)      CURRENT_SELECTION="$OPTARG"
+                                nshift=`expr $nshift + 2 ` ;;
+                esac
+        done
+	shift $nshift
+        ALLFUNCTION="$*"
+        headermenu "$MENUNAME \n\tSelect option :" "$CURRENT_SELECTION"
+        select CHOICEFCT in $ALLFUNCTION $RETURNOPT $EXITOPT
+        do
+                if [[ -n "$CHOICEFCT" ]]
+                then
+                        if [[ "$CHOICEFCT" = "Exit" ]]
+                        then
+                                loginfo "Exit program requested by user."
+                                remove_temp_files
+                                exit 0
+                        elif [[ "$CHOICEFCT" = "Return" ]]
+                        then
+                                return
+                        else
+                                print "choice $CHOICEFCT"
+                                break
+                        fi
+                fi
+        done
+}
+
+
+# Function: selectfctmenu
+#       - Simple function to display a menu using "select" command.
+#       - Display header before menu selection.
+#       - Remind current selection if used with option "S".
+function selectfctmenu {
+	$FULLDEBUG
+	# set fix colums number to try to adap big menu list
+	#
+	# -e 		remove Exit
+	# -r 		remove Cancel
+	# -x name 	extra option name
+	# -m menuname	Menu name
+	# -S 		multiple selesctions
+	#
+	# Exit/Esc 
+	# Cancel/Annuler
+	# OK/Accepter
+	# Continue
+	export COLUMNS=155
+       	clear
+        EXITOPT="Exit"
+        RETURNOPT="Cancel"
+	EXTRANAME=""
+        CURRENT_SELECTION=""
+	Multichoice=no
+	Extraoption=no
+	nshift=0
+        while getopts ":erx:Sm:" opt
+        do
+               	case $opt in
+                       	e)      EXITOPT=""
+                               	nshift=`expr $nshift + 1 ` ;;
+                       	r)      RETURNOPT=""
+                               	nshift=`expr $nshift + 1 ` ;;
+                       	x)      Extraoption=yes
+				EXTRANAME="$OPTARG"
+                               	nshift=`expr $nshift + 2 ` ;;
+                       	S)      Multichoice=yes
+                               	nshift=`expr $nshift + 1 ` ;;
+			m)	MENUNAME="$OPTARG"
+                               	nshift=`expr $nshift + 2 ` ;;
+               	esac
+        done
+	shift $nshift
+        ALLFUNCTION="$*"
+	if [[ -z "$DIALOG" ]]
+	then
+		if [[ "$Multichoice" = "no" ]]
+		then
+        	   headermenu "$MENUNAME \n"
+        	   select CHOICEFCT in $ALLFUNCTION $EXTRANAME $RETURNOPT $EXITOPT
+        	   do
+                	if [[ -n "$CHOICEFCT" ]]
+                	then
+                        	if [[ "$CHOICEFCT" = "Exit" ]]
+                        	then
+                                	loginfo "Exit program requested by user."
+                                	remove_temp_files
+                                	exit 0
+                        	elif [[ "$CHOICEFCT" = "Cancel" ]]
+                        	then
+                                	return 1
+				elif [[ "$CHOICEFCT" = "$EXTRANAME" ]]
+				then
+					return 3
+                        	else
+                                	print "choice $CHOICEFCT"
+                                	break
+                        	fi
+                	fi
+        	   done
+		else
+		   CURRENT_SELECTION=""
+		   EXTRANAME="Continue"
+		   while :
+		   do
+			clear
+        	      	headermenu "$MENUNAME \n\tSelect option :" "$CURRENT_SELECTION"
+        	      	select CHOICEFCT in $ALLFUNCTION $EXTRANAME $RETURNOPT $EXITOPT 
+        	      	do
+                		if [[ -n "$CHOICEFCT" ]]
+                		then
+                        		if [[ "$CHOICEFCT" = "Exit" ]]
+                        		then
+                                		loginfo "Exit program requested by user."
+                                		exit 0
+                        		elif [[ "$CHOICEFCT" = "Cancel" ]]
+                        		then
+						CHOICEFCT=""
+                                		return 1 
+                        		elif [[ "$CHOICEFCT" = "$EXTRANAME" ]]
+                        		then
+						CHOICEFCT="$CURRENT_SELECTION"
+                                		return 3
+                        		else
+						if [[ -z "$CURRENT_SELECTION" ]]
+						then
+							CURRENT_SELECTION="$CHOICEFCT"
+						else
+							CURRENT_SELECTION="$CURRENT_SELECTION $CHOICEFCT"
+						fi
+                                		break
+                        		fi
+                		fi
+        	        done
+
+	            done
+	       fi
+	else
+		i=1
+		OPTFCT=""
+		set -A FCTTABLE
+		if [[ "$Multichoice" = "yes" ]]
+		then
+			menutype="--checklist"
+			for FCT in $ALLFUNCTION
+			do
+				FCTTABLE[$i]=$FCT
+				OPTFCT="$OPTFCT $i $FCT off"
+				i=$(( $i + 1 ))
+			done
+		else
+			menutype="--menu"
+			for FCT in $ALLFUNCTION
+			do
+				FCTTABLE[$i]=$FCT
+				OPTFCT="$OPTFCT $i $FCT"
+				i=$(( $i + 1 ))
+			done
+		fi
+		Hmax=20
+		H=$(( ${#FCTTABLE[*]} + 8 + $(echo "$MENUNAME" |wc -l) )) 
+		W=40
+		T=${#FCTTABLE[*]}
+		if [[ $H -gt $(( $Hmax + 8)) ]]
+		then
+			H=$(( $Hmax + 8))
+			T=$Hmax
+		fi
+		menuout=/tmp/menu.$$
+		if [[ "$DIALOG" = "KDE" ]]
+		then
+		   kdialog  $menutype "$MENUNAME" $OPTFCT >$menuout
+		   rc=$?
+		else
+		   if [[ "$Extraoption" = "yes" ]]
+		   then
+		   	   option="--extra-button --extra-label $EXTRANAME"
+		   else
+			   option=""
+		   fi
+		   dialog $option $menutype "$MENUNAME" $H $W $T $OPTFCT 2>$menuout
+		   rc=$?
+	        fi
+		case $rc in
+			0)
+				CHOICEFCT=""
+				RES=$(cat $menuout)
+				for R in $RES
+				do
+					if [[ -z "$CHOICEFCT" ]]
+					then
+						CHOICEFCT="${FCTTABLE[$R]}"
+					else
+				 		CHOICEFCT="$CHOICEFCT ${FCTTABLE[$R]}"
+					fi
+				done
+				rm $menuout
+				;;
+			1)
+				CHOICEFCT=""
+				return 1
+				;;
+			3)
+				CHOICEFCT=$EXTRANAME
+				return 3
+				;;
+			255)
+                                loginfo "Exit program requested by user."
+				exit 0
+				;;
+		esac
+
+	fi
+}
+
+function readfctmenu
+{
+	$FULLDEBUG
+	CHOICEFCT=""
+	Question=""
+        while getopts ":q:" opts
+        do
+	$FULLDEBUG
+               	case $opts in
+			q)	Question=$OPTARG
+				;;
+               	esac
+        done
+	if [[ -z "$DIALOG" ]]
+	then
+		echo -n $Question
+		read CHOICEFCT
+	elif [[ "$DIALOG" = "KDE" ]]
+	then
+		tmpfile=/tmp/read.$$
+		kdialog --inputbox "$Question" $H $W > $tmpfile
+		CHOICEFCT=$(cat $tmpfile)
+		rm $tmpfile
+	else
+		W=$(( $(echo $Question |wc -c) + 20))
+		H=10
+		tmpfile=/tmp/read.$$
+		dialog --no-cancel --inputbox "$Question" $H $W 2> $tmpfile
+		CHOICEFCT=$(cat $tmpfile)
+		rm $tmpfile
+	fi
+}
+
+function infofctmenu
+{
+	$FULLDEBUG
+	clear
+	nshift=0
+        while getopts ":m:" opt
+        do
+               	case $opt in
+			m)	MENUNAME="$OPTARG"
+				dialogopt="--title"
+                               	nshift=`expr $nshift + 2 ` ;;
+               	esac
+        done
+	shift $nshift
+	ALLINFO="$@"
+	if [[ -z "$DIALOG" ]]
+	then
+   		headermenu "$MENUNAME \n"
+        	echo "$ALLINFO"
+		press_return
+	elif [[ "$DIALOG" = "KDE" ]]
+	then
+		kdialog --msgbox "${ALLINFO}"
+	else
+		W=$(( $(echo "$ALLINFO" |wc -L) + 5 ))
+		H=$(( $(echo "$ALLINFO" |wc -l) + 5 ))
+		dialog "$dialogopt" "$MENUNAME" --msgbox "${ALLINFO}" $H $W
+	fi
+}
+
+# Function: press_return
+#       - Simple function to display a message and invite to press return to continue.
+function press_return
+{
+	$FULLDEBUG
+	echo "\n########################"
+	echo "Press return to continue"
+	echo "########################\n"
+	read
+	clear
+}
+

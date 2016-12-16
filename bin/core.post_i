@@ -1,0 +1,113 @@
+#!/bin/ksh
+
+export FACTORY_ROOT=/usr/local/factory
+
+
+if [ ! -d /var/log/factory ]
+then
+        mkdir /var/log/factory
+fi
+
+if [ ! -d /var/log/factory/logs ]
+then
+	mkdir /var/log/factory/logs
+fi
+
+if [ ! -d /var/log/factory/tmp ]
+then 
+	mkdir /var/log/factory/tmp
+fi
+
+if [ ! -d /var/log/factory/audit ]
+then 
+	mkdir /var/log/factory/audit
+fi
+
+chmod ugo+rwx /var/log/factory
+chmod ugo+rwx /var/log/factory/logs
+chmod ugo+rwx /var/log/factory/tmp
+chmod ugo+rwx /var/log/factory/audit
+
+. $FACTORY_ROOT/core/functions
+FACTORY_NOTTY=N 	# force STDOUT in NIM
+
+fatalcheckid root
+
+PLATFORM=$(uname)
+
+case $PLATFORM in
+	AIX)
+		#
+		# Set $FACTORY_ROOT in /etc/environment
+		#
+		loginfo "Setting /etc/environment"
+		TARGET=/etc/environment
+		WORKFILE=$(add_temp_files environment)
+		FINALFILE=$(add_temp_files environment_final)
+
+		cat $TARGET > $WORKFILE
+
+                # may fail if empty
+                sed '/^FACTORY_ROOT=/d' $WORKFILE > $FINALFILE
+                echo "FACTORY_ROOT=/usr/local/factory" >> $FINALFILE
+
+		fatalrunit cp $FINALFILE $TARGET
+		remove_temp_files
+		;;
+	Linux)
+		if [ -f /etc/redhat-release ]
+		then
+			TARGET=/etc/profile.d/factory.sh
+			loginfo "Automatically adding FACTORY_ROOT to $TARGET"
+			echo "FACTORY_ROOT=/usr/local/factory" > $TARGET
+			echo "export FACTORY_ROOT" >> $TARGET
+		else
+			TARGET=/etc/profile.local
+			loginfo "Automatically adding FACTORY_ROOT to $TARGET"
+                	WORKFILE=$(add_temp_files environment)
+                	FINALFILE=$(add_temp_files environment_final)
+	
+			cat $TARGET > $WORKFILE
+
+			sed '/^FACTORY_ROOT=/d' $WORKFILE > $FINALFILE
+			fatalrunit cp $FINALFILE $WORKFILE
+			sed  '/export FACTORY_ROOT/d' $WORKFILE > $FINALFILE
+
+			# add new conf
+			echo "FACTORY_ROOT=/usr/local/factory" >> $FINALFILE
+			echo "export FACTORY_ROOT" >> $FINALFILE
+			echo "export _AST_FEATURES='UNIVERSE - att'" >> $FINALFILE
+
+                	fatalrunit cp $FINALFILE $TARGET
+                	remove_temp_files
+		fi
+		;;
+	SunOS)
+		loginfo "Automatically adding FACTORY_ROOT to /etc/profile"
+
+                TARGET=/etc/profile
+                WORKFILE=$(add_temp_files environment)
+                FINALFILE=$(add_temp_files environment_final)
+
+                cat $TARGET > $WORKFILE
+
+                # may fail if empty
+                # remove old conf
+                sed '/^FACTORY_ROOT=/d' $WORKFILE > $FINALFILE
+                fatalrunit cp $FINALFILE $WORKFILE
+                sed  '/export FACTORY_ROOT/d' $WORKFILE > $FINALFILE
+
+                # add new conf
+                echo "FACTORY_ROOT=/usr/local/factory" >> $FINALFILE
+                echo "export FACTORY_ROOT" >> $FINALFILE
+
+                fatalrunit cp $FINALFILE $TARGET
+                remove_temp_files
+                ;;
+	*)
+		logwarn "Not environment variable to be set"
+		;;
+esac
+
+exit 0
+
