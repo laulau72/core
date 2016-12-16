@@ -1,12 +1,32 @@
 #!/bin/ksh
 #
+### Factory core
+##
+## This factory is use to set basic/standard functions
+##
+## It contains:
+##
+## [Functions: fct/README](fct/README.md)
+##
+## [Scripts: bin/README](bin/README.md)
+##
+## [Configuration: etc/README](etc/README.md)
+##
+##---
+##
+### Table of Contents
+##
+##__TOC__
+##
+##---
 
-. $FACTORY_ROOT/functions.logs
-. $FACTORY_ROOT/functions.divers
-. $FACTORY_ROOT/functions.cfg
-. $FACTORY_ROOT/functions.menu
 
-##### Init
+. $FACTORY_ROOT/fct/functions.logs
+. $FACTORY_ROOT/fct/functions.divers
+. $FACTORY_ROOT/fct/functions.cfg
+. $FACTORY_ROOT/fct/functions.menu
+
+#### Init
 ##
 ## Init part, run only once
 ## This will set some usefull variable
