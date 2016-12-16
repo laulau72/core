@@ -4,9 +4,9 @@
 
  Subdirecty information:
 
- [fct/ - All functions](fct/README.md)
- [bin/ - All scripts](bin/README.md)
- [etc/ - All configuration files](etc/README.md)
+ * [fct/ - All functions](fct/README.md)
+ * [bin/ - All scripts](bin/README.md)
+ * [etc/ - All configuration files](etc/README.md)
 
 ---
 
