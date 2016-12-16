@@ -3,9 +3,9 @@
 
 $FULLDEBUG
 
-#### Log functions
+#### functions.logs
 ##
-## Function group Description
+## Set of functions to manage miscellaneous logs
 ##
 ##---
 
