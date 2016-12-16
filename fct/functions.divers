@@ -1,9 +1,25 @@
 #!/bin/ksh
 #
+#### functions.divers
+##
+## Set of miscellaneous functions
+##
+##---
 
 $FULLDEBUG
 
-function rmifexists		# Remove the file or several files if the file existes function: rmifexists
+##### rmifexists
+##
+## Remove file or several files if the file existes. 
+## It also remove directory
+##
+###### Input:
+##
+## * files to remove
+##
+##---
+
+function rmifexists
 {
 $FULLDEBUG
 	for f in $*
@@ -20,7 +36,21 @@ $FULLDEBUG
 	done
 }
 
-function fatalcheckenv		# Check the environnment if environnment is not setted function: fatalcheckenv , fatal error output will be displayed.
+##### fatalcheckenv
+##
+## Check the environnment if environnment is not setted
+##
+###### Input:
+##
+## * Env variable
+##
+###### Output:
+##
+## * fatal error output will be displayed, if not set.
+##
+##---
+
+function fatalcheckenv
 {
 $FULLDEBUG
         var="$1"
@@ -31,7 +61,13 @@ $FULLDEBUG
         fi
 }
 
-function exectoreport		# Execute and make the report function: exectoreport
+##### exectoreport
+##
+## Execute and make report
+##
+##---
+
+function exectoreport
 {
 exec >>$FACTORY_LOGFILE 2>&1
 FACTORY_NOTTY=1
@@ -39,6 +75,15 @@ export FACTORY_NOTTY
 return
 }
 
+##### factory_id
+##
+## Print real and effective user and group IDs
+##
+###### Input:
+##
+## User
+## 
+##---
 
 function factory_id
 {
@@ -55,7 +100,16 @@ $FULLDEBUG
 }
 
 
-# Run a programm and log it function: runit
+##### runit
+##
+## Run a programm and log it
+##
+###### Input:
+##
+## Programm
+##
+##---
+
 function runit 
 {
 $FULLDEBUG
@@ -69,7 +123,19 @@ $FULLDEBUG
 	return $rc
 }
 
-#Run a programm and log it and exit if error function: fatalrunit
+##### fatalrunit
+##
+## Run a programm, log it and exit if error
+##
+###### Input:
+##
+## Programm
+##
+###### Output:
+##
+## exit if error
+##
+##---
 
 function fatalrunit
 {
@@ -83,7 +149,15 @@ $FULLDEBUG
 	return 0 
 }
 
-# If a file does not exist make fatal error and exit function: fatalfilenotexist
+##### fatalfilenotexist
+##
+## If a file does not exist make fatal error and exit
+##
+###### Input:
+##
+## file
+##
+##---
 
 function fatalfilenotexist
 {
@@ -95,7 +169,19 @@ $FULLDEBUG
 	return 0
 }
 
-# Check user ID for running a program function: fatalcheckid and exist if user ID is not authorized.
+##### fatalcheckid
+##
+## Check if this program is launch from this user
+##
+###### Input:
+##
+## id to check
+##
+###### Output:
+##
+## Exit if not this user
+##
+##---
 
 function fatalcheckid
 {
@@ -110,7 +196,20 @@ $FULLDEBUG
 	return 0
 }
 
-# Check group ID for running a program function: fatalcheckid and exist if group ID is not authorized.
+##### fatalcheckgroup
+##
+## Check if this program is launch from user with this group
+##
+###### Input:
+##
+## group to check
+##
+###### Output:
+##
+## Exit if not in this group
+##
+##---
+
 function fatalcheckgroup
 {
 $FULLDEBUG
@@ -124,6 +223,44 @@ $FULLDEBUG
 	return 0
 }
 
+##### fatalcheckplatform
+##
+## Check if this program is launch on this platform 
+##
+###### Input:
+##
+## platform to check
+##
+###### Output:
+##
+## Exit if not this platform
+##
+##---
+
+function fatalcheckplatform
+{
+$FULLDEBUG
+        pltocheck=$1
+        if [ "$pltocheck" != "$FACTORY_PLATFORM" ]
+        then
+                fatalerror 99 "Program should run on $pltocheck instead of $FACTORY_PLATFORM"
+        fi
+        return 0
+}
+
+##### add_temp_files
+##
+## Create a temporary file
+##
+###### Input:
+##
+## Name 
+##
+###### Output:
+##
+## Name of the temporary file
+##
+##---
 
 function add_temp_files
 {
@@ -154,6 +291,20 @@ $FULLDEBUG
 	echo $tempfn
 }
 
+##### add_audit_files
+##
+## Create an audit file
+##
+###### Input:
+##
+## Name
+##
+###### Output:
+##
+## Name of the audit file
+##
+##---
+
 function add_audit_files
 {
 $FULLDEBUG
@@ -176,6 +327,11 @@ $FULLDEBUG
 	echo $tempfn
 }
 
+##### remove_temp_files
+##
+## Remove temporary file that was created
+##
+##---
 
 function remove_temp_files
 {
@@ -193,18 +349,18 @@ $FULLDEBUG
 	fi
 }
 
-function fatalcheckplatform
-{
-$FULLDEBUG
-        pltocheck=$1
-        if [ "$pltocheck" != "$FACTORY_PLATFORM" ]
-        then
-                fatalerror 99 "Program should run on $pltocheck instead of $FACTORY_PLATFORM"
-        fi
-        return 0
-}
+##### isVirtualMachine
+##
+##  Checking if the machine (only in Linux OS) is a virtual machine (VMWare)
+##
+##### Output:
+##
+## * 0: virtual	
+## * 1: physical
+##
+##---
 
-function isVirtualMachine	# Checking if the machine (only in Linux OS) is a virtual machine (VMWare) function: isVirtualMachine
+function isVirtualMachine
 {
 $FULLDEBUG
 	fatalcheckplatform "Linux"
@@ -220,7 +376,13 @@ $FULLDEBUG
 
 }
 
-function yorn			# YES or NO reponse in 3 languages English,French and German function: yorn
+##### yorn
+##
+##  YES or NO reponse in 3 languages English,French and German
+##
+##---
+
+function yorn
 {
 $FULLDEBUG
       response=""
@@ -295,7 +457,17 @@ $FULLDEBUG
       fi
 }
 
-function nok_ok 		#Display message action complete successful or action failed depend of param 1 that is the RC number.
+##### nok_ok
+##
+## Display message action complete successful or action failed depend of param 1 that is the RC number.
+##
+###### Input:
+##
+## * number to check
+##
+##---
+
+function nok_ok
 {
 $FULLDEBUG
 	RC=$1
@@ -308,7 +480,20 @@ $FULLDEBUG
 	return $RC
 }
 
-function set_prop_file		# Change user owner and group owner of the file function: set_prop_file
+##### set_prop_file
+##
+## Change rights, user owner and group owner of a file.
+##
+###### Input:
+##
+## * $1 file_mod
+## * $2 file_owner
+## * $3 file_group
+## * $4 file_name
+##
+##---
+
+function set_prop_file
 {
 $FULLDEBUG
 	fatalcheckid root
@@ -339,55 +524,74 @@ $FULLDEBUG
 	fi
 }
 
+##### list_to_line
+##
+## Simple function to convert entries on list mode to a single line separate by space (replace all CR by a SPACE)
+## Sort input before put in line.
+##
+##---
 
-# Function: list_to_line
-#       - Simple function to convert entries on list mode to a single line separate by space
-#               (replace all CR by a SPACE)
-#       - sort input before put in line.
 function list_to_line
 {
 $FULLDEBUG
-infile=$1
-sort $infile | sed -e :a -e '$!N;s/\n/ /;ta' -e 'P;D'
+	infile=$1
+	sort $infile | sed -e :a -e '$!N;s/\n/ /;ta' -e 'P;D'
 }
 
+##### test_notnum
+##
+## function used to test if a value is numeric or not.
+## can test positve, negative or both possibility.
+##
+###### Output:
+## 
+## * 0:  value is numeric
+## * 22: value is not numeric
+##
+##---
 
-# Function: test_notnum
-#       - function used to test if a value is numeric or not.
-#       - can test positve, negative or both possibility.
-#       - return code :
-#               0 = value is numeric
-#               22= value is not numeric
 function test_notnum
 {
 $FULLDEBUG
 
-testnumval="[+-]*"
-while getopts ":pnv:" opts
-do
-        case $opts in
-                p) testnumval="[+]*" ;;
-                n) testnumval="-" ;;
-                v) val=$OPTARG ;;
-                *) logerror "check usage function"
-                   return 22 ;;
-        esac
-done
-if [[ -z "$val" ]]
-then
-        logerror "value to be test was empty."
-        return 22
-fi
+	testnumval="[+-]*"
+	while getopts ":pnv:" opts
+	do
+       		case $opts in
+               		p) testnumval="[+]*" ;;
+			n) testnumval="-" ;;
+                	v) val=$OPTARG ;;
+                	*) logerror "check usage function"
+                   	   return 22 ;;
+		esac
+	done
+	if [[ -z "$val" ]]
+	then
+       		logerror "value to be test was empty."
+        	return 22
+	fi
 
-if [[ -z "$(echo ${val} | egrep "^${testnumval}[ [:digit:] ]*$")" ]]
-then
-        logerror "Wrong numeric value : $val (or not a numeric value)."
-        return 22
-else
-        loginfo "Value $val is numeric."
-        return 0
-fi
+	if [[ -z "$(echo ${val} | egrep "^${testnumval}[ [:digit:] ]*$")" ]]
+	then
+	        logerror "Wrong numeric value : $val (or not a numeric value)."
+       		return 22
+	else
+		loginfo "Value $val is numeric."
+        	return 0
+	fi
 }
+
+##### genpwd
+##
+## Generate random password and output on standard output
+##
+###### Input:
+##
+## * -l:  Minimum password leng
+## * -n:  Minimum numeric in password 
+## * -a:  Minimum alpha in password 
+##
+##---
 
 # Function: genpwd
 #       - Generate random password and output on standard output
@@ -396,74 +600,74 @@ function genpwd
 {
 $FULLDEBUG
 
-minpwdleng=8
-minnum=1
-minalpha=2
-while getopts ":l:n:a:" opts
-do
-	case $opts in
-		l) minpwdleng=$OPTARG ;;
-		n) minnum=$OPTARG ;;
-		a) minalpha=$OPTARG ;;
-		*) : ;;
-	esac
-done	
-# test and compare limits of num and alpha with lenght 
-# lenght , minnum and minalpha must be a numeric value
-echo $minpwdleng | egrep "^[0-9]+$" 1>/dev/null 2>&1
-if [ $? -ne 0 ]
-then
 	minpwdleng=8
-fi
-echo $minnum | egrep "^[0-9]+$" 1>/dev/null 2>&1
-if [ $? -ne 0 ]
-then
-	minnum=1
-fi
-echo $minalpha | egrep "^[0-9]+$" 1>/dev/null 2>&1
-if [ $? -ne 0 ]
-then
-	minalpha=2
-fi
-# lenght must be to 3 char
-if [ $minpwdleng -lt 3 ]
-then
-	minpwdleng=8
-fi
-# sum of minnum + minalpha must be shorter or egal to lenght
-minalnumleng=$(expr $minnum + $minalpha)
-if [ $minpwdleng -lt $minalnumleng ]
-then
-	minalpha=$(expr $minpwdleng - $minnum)
-fi
-# reset minimum criteria for alpha and num if limit are defined over the lenght
-if [ $minpwdleng -le $minnum -o $minpwdleng -le $minalpha ]
-then
 	minnum=1
 	minalpha=2
-fi
-# clear previous password and define list of char used for generate password
-password=""
-policy=tobecheck
-alpha="abcdefghijkmnopqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ"
-number="0123456789"
-string=$number$alpha$number
-# Generate the password
-i=0
-while (( $i < $minpwdleng ))
-do	
-	char=$(echo $string |cut -c$(($RANDOM%${#string}+1)))
-	password="${password} ${char}"
-	echo "${password}" | sed "s/ //g" | grep "^[0-9]" 1>/dev/null 2>&1
-	if [ $? -eq 0 ]
+	while getopts ":l:n:a:" opts
+	do
+		case $opts in
+			l) minpwdleng=$OPTARG ;;
+			n) minnum=$OPTARG ;;
+			a) minalpha=$OPTARG ;;
+			*) : ;;
+		esac
+	done	
+	# test and compare limits of num and alpha with lenght 
+	# lenght , minnum and minalpha must be a numeric value
+	echo $minpwdleng | egrep "^[0-9]+$" 1>/dev/null 2>&1
+	if [ $? -ne 0 ]
 	then
-		#echo "    reset because start with number : $password"   # uncomment FOR DEBUG
-		password=""
-		i=0
-		continue
-	else
-               	((i=i+1))
+		minpwdleng=8
 	fi
+	echo $minnum | egrep "^[0-9]+$" 1>/dev/null 2>&1
+	if [ $? -ne 0 ]
+	then
+		minnum=1
+	fi
+	echo $minalpha | egrep "^[0-9]+$" 1>/dev/null 2>&1
+	if [ $? -ne 0 ]
+	then
+		minalpha=2
+	fi
+	# lenght must be to 3 char
+	if [ $minpwdleng -lt 3 ]
+	then
+		minpwdleng=8
+	fi
+	# sum of minnum + minalpha must be shorter or egal to lenght
+	minalnumleng=$(expr $minnum + $minalpha)
+	if [ $minpwdleng -lt $minalnumleng ]
+	then
+		minalpha=$(expr $minpwdleng - $minnum)
+	fi
+	# reset minimum criteria for alpha and num if limit are defined over the lenght
+	if [ $minpwdleng -le $minnum -o $minpwdleng -le $minalpha ]
+	then
+		minnum=1
+		minalpha=2
+	fi
+	# clear previous password and define list of char used for generate password
+	password=""
+	policy=tobecheck
+	alpha="abcdefghijkmnopqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ"
+	number="0123456789"
+	string=$number$alpha$number
+	# Generate the password
+	i=0
+	while (( $i < $minpwdleng ))
+	do	
+		char=$(echo $string |cut -c$(($RANDOM%${#string}+1)))
+		password="${password} ${char}"
+		echo "${password}" | sed "s/ //g" | grep "^[0-9]" 1>/dev/null 2>&1
+		if [ $? -eq 0 ]
+		then
+			#echo "    reset because start with number : $password"   # uncomment FOR DEBUG
+			password=""
+			i=0
+			continue
+		else
+       	        	((i=i+1))
+		fi
         done
         set -A PASSWORD $password
 
@@ -492,9 +696,9 @@ do
                 else
                         policy=checked
                 fi
-done
-pwd=$(echo ${PASSWORD[*]}|sed "s/ //g")
-echo $pwd
+	done
+	pwd=$(echo ${PASSWORD[*]}|sed "s/ //g")
+	echo $pwd
 }
 
 ##### readpwd
@@ -543,12 +747,19 @@ function readpwd
          fi
  }
 
+##### addcronjobs
+##
+## Used to add cron job defined in configuration file(s) (add as parameter)
+##
+## files should have the following :
+## name;user;script;schedule_min;schedule_hour;schedule_dayofmounth;schedule_mounth;schedule_weekday
+##
+###### Input:
+##
+## * file
+##
+##---
 
-#
-# function used to add cron job defined in configuration file(s) (add as parameter)
-# files should have the following :
-# name;user;script;schedule_min;schedule_hour;schedule_dayofmounth;schedule_mounth;schedule_weekday
-#
 function addcronjobs {
 $FULLDEBUG
 	fatalcheckid root
@@ -647,119 +858,144 @@ $FULLDEBUG
 	done
 }
 
-# Function: detect_screen_size
-#       - Detect screen geometry
-#		. Set variable for Colums and Lines
-#		. Set variable for select command in function  of screen lines number
+##### detect_screen_size
+##
+## Detect screen geometry
+##   Set variable for Colums and Lines
+##   Set variable for select command in function  of screen lines number
+##
+##---
+
 function detect_screen_size
 {
-TTY_COLUMNS=$(stty -a | head -1 | awk -F ";" '{sub("columns","",$3);gsub (" ","",$3);print $3}')
-TTY_LINES=$(stty -a | head -1 | awk -F ";" '{sub("rows","",$2);gsub (" ","",$2);print $2}')
-SELECT_LINES=$(echo "${TTY_LINES} * 2 / 3" |bc)
+$FULLDEBUG
+	TTY_COLUMNS=$(stty -a | head -1 | awk -F ";" '{sub("columns","",$3);gsub (" ","",$3);print $3}')
+	TTY_LINES=$(stty -a | head -1 | awk -F ";" '{sub("rows","",$2);gsub (" ","",$2);print $2}')
+	SELECT_LINES=$(echo "${TTY_LINES} * 2 / 3" |bc)
 }
 
-# Function: set_screen_size
-#       - Set variables for tty
-#
+##### set_screen_size
+##
+## Set variables for tty
+##
+##---
+
 function set_screen_size
 {
-detect_screen_size
-export LINES=$TTY_LINES
-if [ $TTY_COLUMNS -gt 130 ]
-then
-	export COLUMNS=155
-else
-	export COLUMNS=130
-fi
+$FULLDEBUG
+	detect_screen_size
+	export LINES=$TTY_LINES
+	if [ $TTY_COLUMNS -gt 130 ]
+	then
+		export COLUMNS=155
+	else
+		export COLUMNS=130
+	fi
 }
 
-# Function: convertsize
-#	- Convert a sike in Bytes or other scale to another scale
-#	- Input : option mandatory
-#			-s size with unit (100MB, 1.04TB, 100348965392B, 2039GB)
-#		  	-c unit (B, KB, MB, GB, TB, PB, EX, ZB, YB)
-#		  option not mandatory
-#			-r to display automatic scaled human readable size
-#	- output : <input size>:<output size converted>:<optional human readable size>
-#		ex : 	0.32TB:335544MB:327.67GB
-#			32GB:0TB:32.00GB
-#			32GB:32768MB:32.00GB
-#			0.3243GB:332MB:332.08MB
+##### convertsize
+##
+## Convert a size in Bytes or other scale to another scale
+##
+###### Input:
+##
+## option mandatory
+##	* s size with unit (100MB, 1.04TB, 100348965392B, 2039GB)
+##	* c unit (B, KB, MB, GB, TB, PB, EX, ZB, YB)
+## option not mandatory
+##      * r to display automatic scaled human readable size
+##
+###### Output:
+##	
+## Ex:	
+##	0.32TB:335544MB:327.67GB
+##	32GB:0TB:32.00GB
+##	32GB:32768MB:32.00GB
+##	0.3243GB:332MB:332.08MB	
+##	
+##---
 
 function convertsize {
 $FULLDEBUG
 
-humread="n"
-opts=":s:c:r"
-while getopts $opts opt
-do
-        case $opt in
-                s) ISIZE="$OPTARG" ;;
-                c) CSIZE="$OPTARG" ;;
-		r) humread="y" ;;
-        esac
-done
-
-if [ -z "$ISIZE" -o -z "$CSIZE" ]
-then
-	echo "error with params."
-fi
-
-EISIZE=$(echo "$ISIZE" | awk '{INS=toupper ($0); print substr( INS, length(INS) - 1, length(INS) ) }')
-case "$EISIZE" in
-	KB)	cinbmult=' * 1024' ;;
-	MB)	cinbmult=' * 1024^2' ;;
-	GB)	cinbmult=' * 1024^3' ;;
-	TB)	cinbmult=' * 1024^4' ;;
-	PB)	cinbmult=' * 1024^5' ;;
-	EB)	cinbmult=' * 1024^6' ;;
-	ZB)	cinbmult=' * 1024^7' ;;
-	YB)	cinbmult=' * 1024^8' ;;
-	[0-9]B)	cinbmult=' * 1' ;;
-esac
-
-ECSIZE=$(echo "$CSIZE" | awk '{INS=toupper ($0); print substr( INS, length(INS) - 1, length(INS) ) }')
-case "$ECSIZE" in
-	KB)	convdiv=' / 1024' ;;
-	MB)	convdiv=' / 1024^2' ;;
-	GB)	convdiv=' / 1024^3' ;;
-	TB)	convdiv=' / 1024^4' ;;
-	PB)	convdiv=' / 1024^5' ;;
-	EB)	convdiv=' / 1024^6' ;;
-	ZB)	convdiv=' / 1024^7' ;;
-	YB)	convdiv=' / 1024^8' ;;
-	[0-9]B)	convdiv=' / 1' ;;
-esac
-
-ISIZEN=$(echo "$ISIZE" | awk '{INS=toupper ($0); gsub ('/[KMGTPEZY]?B$/',"",INS); print INS}')
-INBSIZE=$(echo "scale=2; $ISIZEN $cinbmult" | bc | awk '{printf "%.0f\n", $1}')
-OUTSIZE=$(echo "scale=0; $INBSIZE $convdiv" | bc | awk '{printf "%.0f\n", $1}')
-
-# convert in human readable format independently of convert size selected in option
-HUMREADVAL=""
-if [ "$humread" = "y" ]
-then
-	# Convert input parameter (number of bytes) to Human Readable form
-	SLIST="bytes,KB,MB,GB,TB,PB,EB,ZB,YB"
-	POWER=1
-	VAL=$( echo "scale=2; $INBSIZE / 1" | bc)
-	VINT=$( echo $VAL / 1024 | bc )
-	while [ $VINT -gt 0 ]
+	humread="n"
+	opts=":s:c:r"
+	while getopts $opts opt
 	do
-		let POWER=POWER+1
-		VAL=$( echo "scale=2; $VAL / 1024" | bc)
-		VINT=$( echo $VAL / 1024 | bc )
+       		case $opt in
+	                s) ISIZE="$OPTARG" ;;
+               		c) CSIZE="$OPTARG" ;;
+			r) humread="y" ;;
+       		esac
 	done
-	HUMREADVAL=$(echo $VAL$( echo $SLIST | cut -f$POWER -d, ))
-fi
-echo "${ISIZEN}${EISIZE}:${OUTSIZE}${ECSIZE}:${HUMREADVAL}"
+
+	if [ -z "$ISIZE" -o -z "$CSIZE" ]
+	then
+		echo "error with params."
+	fi
+
+	EISIZE=$(echo "$ISIZE" | awk '{INS=toupper ($0); print substr( INS, length(INS) - 1, length(INS) ) }')
+	case "$EISIZE" in
+		KB)	cinbmult=' * 1024' ;;
+		MB)	cinbmult=' * 1024^2' ;;
+		GB)	cinbmult=' * 1024^3' ;;
+		TB)	cinbmult=' * 1024^4' ;;
+		PB)	cinbmult=' * 1024^5' ;;
+		EB)	cinbmult=' * 1024^6' ;;
+		ZB)	cinbmult=' * 1024^7' ;;
+		YB)	cinbmult=' * 1024^8' ;;
+		[0-9]B)	cinbmult=' * 1' ;;
+	esac
+
+	ECSIZE=$(echo "$CSIZE" | awk '{INS=toupper ($0); print substr( INS, length(INS) - 1, length(INS) ) }')
+	case "$ECSIZE" in
+		KB)	convdiv=' / 1024' ;;
+		MB)	convdiv=' / 1024^2' ;;
+		GB)	convdiv=' / 1024^3' ;;
+		TB)	convdiv=' / 1024^4' ;;
+		PB)	convdiv=' / 1024^5' ;;
+		EB)	convdiv=' / 1024^6' ;;
+		ZB)	convdiv=' / 1024^7' ;;
+		YB)	convdiv=' / 1024^8' ;;
+		[0-9]B)	convdiv=' / 1' ;;
+	esac
+
+	ISIZEN=$(echo "$ISIZE" | awk '{INS=toupper ($0); gsub ('/[KMGTPEZY]?B$/',"",INS); print INS}')
+	INBSIZE=$(echo "scale=2; $ISIZEN $cinbmult" | bc | awk '{printf "%.0f\n", $1}')
+	OUTSIZE=$(echo "scale=0; $INBSIZE $convdiv" | bc | awk '{printf "%.0f\n", $1}')
+
+	# convert in human readable format independently of convert size selected in option
+	HUMREADVAL=""
+	if [ "$humread" = "y" ]
+	then
+		# Convert input parameter (number of bytes) to Human Readable form
+		SLIST="bytes,KB,MB,GB,TB,PB,EB,ZB,YB"
+		POWER=1
+		VAL=$( echo "scale=2; $INBSIZE / 1" | bc)
+		VINT=$( echo $VAL / 1024 | bc )
+		while [ $VINT -gt 0 ]
+		do
+			let POWER=POWER+1
+			VAL=$( echo "scale=2; $VAL / 1024" | bc)
+			VINT=$( echo $VAL / 1024 | bc )
+		done
+		HUMREADVAL=$(echo $VAL$( echo $SLIST | cut -f$POWER -d, ))
+	fi
+	echo "${ISIZEN}${EISIZE}:${OUTSIZE}${ECSIZE}:${HUMREADVAL}"
 }
+
+##### whorun
+##
+## Return muid:fuller conencted to teh server
+##
+##---
 
 function whorun 			#Return muid:fuller conencted to teh server
 {
-user_muid=`who -m|awk '{print $1}'`
-user_fullname=`finger -m ${user_muid}|grep "In real life"|sed 's/.*life: //'`
+$FULLDEBUG
+	user_muid=`who -m|awk '{print $1}'`
+	user_fullname=`finger -m ${user_muid}|grep "In real life"|sed 's/.*life: //'`
 
-echo "${user_muid} : ${user_fullname}"
+	echo "${user_muid} : ${user_fullname}"
 }
 
