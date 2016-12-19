@@ -1,0 +1,83 @@
+#!/bin/ksh
+#####  create.README
+##
+##  create.README -d factory_dir
+##
+## This script will Generate README.md file
+##
+###### Option:
+##
+## * -d factory_dir       Directory base to genereate READMEmd files.
+##
+###### Return code:
+##
+## * 0    Successful
+## * 22   usage
+##
+##---
+
+$FULLDEBUG
+program=$(basename $0)
+
+function usage
+{
+        echo "
+
+        $program -d factory_dir
+
+        This script will Generate README.md file
+
+        Option:
+        -d factory_dir       Directory base to genereate READMEmd files.
+        "
+        exit 22
+}
+
+
+while getopts ":d:" opts
+do
+	case $opts in
+		d) fdir=$OPTARG ;;
+		*) usage ;;
+	esac
+done
+
+if [ ! -d "$fdir" ]
+then
+	usage
+fi
+
+file=$fdir/functions
+tmp=$(grep "^##" $file |sed 's/^##//g')
+toc=$(echo "$tmp"| grep "^##"  |grep '\(^#\{1,3\} \)'|sed 's/^###/---* /g' |sed 's/^##/--* /g' |sed 's/^#/-* /g' |awk '{print $1" ["$2"](#"$2")"}' |sed 's/-/ /g')
+echo "${tmp//__TOC__/$toc}" > /$fdir/README.md
+
+for fsdir in `find $fdir -mindepth 1 -maxdepth 1 -type d |grep -v .git`
+do
+	tmpfile=/tmp/README.tmp
+	tocfile=/tmp/README.toc
+	rm $tmpfile
+	rm $tocfile
+	echo "
+# $fsdir directory
+
+# Table of Contents
+
+__TOC__
+
+---
+
+" > $tmpfile
+
+	for file in `find $fsdir -mindepth 1 -maxdepth 1 -type f |grep -v .git|grep -v README.md`
+	do
+	        if [[ $(file -b --mime-type $file) =~ ^text ]]
+	        then
+	                grep "^##" $file |sed 's/^##//g' >> $tmpfile
+	                grep "^##" $file |sed 's/^##//g' | grep "^##"  |grep '\(^#\{1,3\} \)'|sed 's/^###/---* /g' |sed 's/^##/--* /g' |sed 's/^#/-* /g' |awk '{print $1" ["$2"](#"$2")"}' |sed 's/-/ /g' >> $tocfile
+	        fi
+	done
+	tmp=$(<$tmpfile)
+	toc=$(<$tocfile)
+	echo "${tmp//__TOC__/$toc}" > $fsdir/README.md
+done
