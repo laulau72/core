@@ -1,9 +1,10 @@
 
-# /home/root/core/bin directory
+# bin directory
 
 # Table of Contents
 
    * [create.README](#create.README)
+   * [core.post_i](#core.post_i)
 
 ---
 
@@ -22,5 +23,12 @@
 
  * 0    Successful
  * 22   usage
+
+---
+### core.post_i
+
+ core.post_i
+
+ This script will setup directory and env variable after installing the core factoy
 
 ---

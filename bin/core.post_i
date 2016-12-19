@@ -1,4 +1,13 @@
 #!/bin/ksh
+##### core.post_i
+##
+## core.post_i
+##
+## This script will setup directory and env variable after installing the core factoy
+##
+##---
+
+
 
 export FACTORY_ROOT=/usr/local/factory
 

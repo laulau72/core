@@ -59,7 +59,7 @@ do
 	rm $tmpfile
 	rm $tocfile
 	echo "
-# $fsdir directory
+# $(basename $fsdir) directory
 
 # Table of Contents
 

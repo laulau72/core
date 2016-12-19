@@ -1,5 +1,5 @@
 
-# /home/root/core/etc directory
+# etc directory
 
 # Table of Contents
 
