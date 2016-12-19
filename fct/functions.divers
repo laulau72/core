@@ -353,7 +353,7 @@ $FULLDEBUG
 ##
 ##  Checking if the machine (only in Linux OS) is a virtual machine (VMWare)
 ##
-##### Output:
+###### Output:
 ##
 ## * 0: virtual	
 ## * 1: physical
