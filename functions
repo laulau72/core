@@ -31,10 +31,10 @@
 ##
 ##---
 
-. $FACTORY_ROOT/fct/functions.logs
-. $FACTORY_ROOT/fct/functions.divers
-. $FACTORY_ROOT/fct/functions.cfg
-. $FACTORY_ROOT/fct/functions.menu
+. $FACTORY_ROOT/core/fct/functions.logs
+. $FACTORY_ROOT/core/fct/functions.divers
+. $FACTORY_ROOT/core/fct/functions.cfg
+. $FACTORY_ROOT/core/fct/functions.menu
 
 #### Init
 ##
