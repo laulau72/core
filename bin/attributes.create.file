@@ -1,0 +1,212 @@
+#!/bin/ksh
+#
+##### attributes.create.file
+##
+## attributes.create.file -a Arch -e Env -r Role -i Desc -s Site_loc -u Server [-d Site_dc] [-m MidleWare] [-c Cat] [-f] [-h]
+##
+## This script is use to automaticaly create the attributes.hostname file
+##
+###### Option:
+##
+##	-a Arch         Architecture Information sould be Linux, AIX or SunOs
+##	-e Env          Environment parameter should be p (production), v (validation), t (test) or d (development)
+##	-r Role         Role of the server (ex: lamp, ecomm ...)
+##	-u Server       Name of the server
+##	-m MidleWare    Midleware parameter is optional and is use to specifie midleware information( ex: oracle, mysql
+##	-i Desc         Description of the server
+##	-s Site_loc     Site location, where the server is installed gs, ......
+##	-d Site_dc      Site Datacenter, datacenter name where the server is located DC1, DC2 ...
+##	-c Cat          Server Category, defined the server category A, B or C
+##	-f              Force overwriting existing attributes.hostname file
+##
+##	-h              This Help!
+##
+## This will set the follwing variables:
+##
+##	FACTORY_ROLE
+##	FACTORY_ENV
+##	FACTORY_ARCH
+##	FACTORY_LOCATION
+##	FACTORY_DATACENTER
+##	FACTORY_CATEGORY
+##	FACTORY_MW
+##	BANNER_DESC
+##
+###### Return code:
+##
+## * 0    Successful
+## * 22   usage
+##
+##---
+
+. $FACTORY_ROOT/core/functions
+
+$FULLDEBUB
+
+
+function usage {
+        loginfo "Usage: $prgm -a Arch -e Env -r Role -i Desc -s Site_loc -u Server [-d Site_dc] [-m MidleWare] [-c Cat] [-B] [-f] [-h] 
+
+        Description:
+                This script is use to automaticaly create the attributes.hostname file
+
+        Option:
+                -a Arch		Architecture Information sould be Linux, AIX or SunOs
+                -e Env		Environment parameter should be p (production), v (validation), t (test) or d (development)
+		-r Role		Role of the server (ex: lamp, ecomm ...)
+		-u Server	Name of the server
+                -m MidleWare	Midleware parameter is optional and is use to specifie midleware information( ex: oracle, mysql
+                -i Desc		Description of the server 
+                -s Site_loc	Site location, where the server is installed gs, ......
+                -d Site_dc	Site Datacenter, datacenter name where the server is located DC1, DC2 ...
+                -c Cat		Server Category, defined the server category A, B or C
+
+                -h		This Help!
+"
+        exit 22
+}
+
+fatalcheckid root
+attrfile=$(add_temp_files)
+ARCH_Parm=""
+ENV_Parm=""
+MW_Parm=""
+DESC_Parm=""
+LOC_Parm=""
+Datacenter_Parm=""
+CAT_Parm=""
+ROLE_Parm=""
+SRV_Name=""
+
+opts=":ha:e:m:i:s:d:c:r:u:fB"
+while getopts $opts opt
+do
+        case $opt in
+                a) ARCH_Parm=$OPTARG ;;
+                e) ENV_Parm=$OPTARG ;;
+                m) MW_Parm=$OPTARG ;;
+                i) DESC_Parm=$OPTARG ;;
+                s) LOC_Parm=$OPTARG ;;
+                d) Datacenter_Parm=$OPTARG ;;
+                c) CAT_Parm=$OPTARG ;;
+                r) ROLE_Parm=$OPTARG ;;
+		u) SRV_Name=$OPTARG ;;
+                h) usage ;;
+                *) usage ;;
+        esac
+done
+
+if [ ! -z "$SRV_Name" ]
+then
+	echo "#!/bin/ksh
+# ===============================
+# This file is used to configure
+# the server $SRV_Name
+#
+
+" > $attrfile
+else
+	logerror "Server name is mandatory"
+	usage
+fi
+
+if [ -z "$ROLE_Parm" ]
+then
+        logerror "Role is mendatory"
+        usage
+else
+	echo "export FACTORY_ROLE=$ROLE_Parm" >> $attrfile
+fi
+
+if [ -z "$ENV_Parm" ]
+then
+	logerror "Environment is mandatory"
+	usage
+else	
+	case $ENV_Parm in
+		p|v|t|d)
+			echo "export FACTORY_ENV=$ENV_Parm" >> $attrfile
+			;;
+		*)
+			fatalerror 2 "Environment should be p, v, t or d"
+			;;
+	esac
+fi
+
+if [ -z "$ARCH_Parm" ]
+then
+        logerror "Architecture is mendatory"
+        usage
+else
+	case $ARCH_Parm in
+		Linux|AIX|SunOS)
+			echo "export FACTORY_ARCH=$ARCH_Parm" >> $attrfile
+			;;
+		*)
+			fatalerror 2 "Architecture should be Linux,AIX or SunOS"
+			;;
+	esac	
+fi
+	
+
+if [ -z "$DESC_Parm" ]
+then
+	logerror "Description is mendatory"
+	usage
+else
+	if [ $(echo $DESC_Parm |wc -c) -lt 33 ]
+	then
+		echo export BANNER_DESC=\"$DESC_Parm\" >> $attrfile
+	else
+		logerror "Description parameter too long"
+	fi
+fi
+
+if [ -z "$LOC_Parm" ]
+then
+	logerror "Location is mendatory"
+	usage
+else
+	case $LOC_Parm in
+		sg|sgu)
+			echo "export FACTORY_LOCATION=sg" >> $attrfile
+			if [ ! -z "$Datacenter_Parm" ]
+                        then
+			   case $Datacenter_Parm in
+                                C1|C2)
+                                        echo "export FACTORY_DATACENTER=$Datacenter_Parm" >> $attrfile
+                                        ;;
+                                *)
+                                        fatalerror 2 "Datacenter for $LOC_Parm should be C1 or C2"
+                                        ;;
+                           esac
+			fi
+                        ;;
+
+		*)
+			fatalerror 2 "Location should be sg or sgu"
+			;;
+	esac	
+fi
+
+if [ ! -z "$CAT_Parm" ]
+then
+	case $CAT_Parm in
+		A|B|C) 
+			echo "export FACTORY_CATEGORY=$CAT_Parm" >> $attrfile
+			;;
+		*)
+			fatalerror 2 "Categorie should be A, B or C"
+			;;
+	esac
+fi
+	
+echo "export FACTORY_MW=$MW_Param" >> $attrfile
+
+if [ ! -d $FACTORY_ROOT/attrcfg/etc ]
+then
+	mkdir -p $FACTORY_ROOT/attrcfg/etc
+fi
+cp -p $attrfile $FACTORY_ROOT/attrcfg/etc/attributes.$SRV_Name
+chmod 444 $FACTORY_ROOT/attrcfg/etc/attributes.$SRV_Name
+chown root.bin $FACTORY_ROOT/attrcfg/etc/attributes.$SRV_Name
