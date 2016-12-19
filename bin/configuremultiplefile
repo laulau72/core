@@ -1,0 +1,454 @@
+#!/bin/ksh
+#
+##### configuremultiplefile
+##
+## Modify multiple file based on description file that contain changes.
+##
+###### Option:
+##
+##	-h      Simple help
+##	-H      This help, include configuratin file syntax.
+##	-f      Name of file that contain data & description of changes.
+##
+##---
+
+. $FACTORY_ROOT/core/functions
+$FULLDEBUG
+
+usage()
+{
+        $FULLDEBUG
+        loginfo "Usage: $0 [-h] [-H] -f {filename}
+        Description : Modify multiple file based on description file that contain changes.
+        Options :
+                -h      This help
+		-H	Full help, include configuratin file syntax.
+		-f	Name of file that contain data & description of changes."
+}
+
+fullusage()
+{
+        $FULLDEBUG
+        loginfo "Usage: $0 [-h] [-H] -f {filename}
+        Description : Modify multiple file based on description file that contain changes.
+        Options :
+                -h      Simple help
+		-H	This help, include configuratin file syntax.
+		-f	Name of file that contain data & description of changes.
+
+	Configuration file syntax :
+	Each section must be confined on 2 tags LABEL
+		All section must start with syntax : [LABEL:m:x:y:z:f]
+			Where :	m = type of change
+				x = mode of file  (ex : 0644)
+				y = owner of file (ex : root)
+				z = group of file (ex : system)
+				f = filename	  (filename in fullpath)
+			The types of change can be :
+				N = create file (all content on tags is added on new file. If exist, the file is overwrited.)
+				n = Same mode than "N" but the variables has been interpreted before create the new file.
+				A = append file (all content on tags is append at end of file. 
+						- If file does not exist, it's create.
+						- If line exist, the line is not added.)
+				a = Same mode than "A" but the variables has been interpreted before append on file.
+				R = replace line . A triple of lines is interpreted.
+						- first is the regular expression (you can set variables)
+						- The second the separator. Must contain only --- (three minus characters)
+						- The third is the new line that replace all lines that corresponding. (you can set variables)
+							* lines must not contain triple dash (---)
+							* all lines that start with a space or tab char must be protected by a backslash (\)
+				I = Insert text in an existing file
+						- First line is to define the insertion mode
+						  Two mode are allowed 
+							* insert before each lines that match with regular expression
+								ex : linebeforematch="text to match or regex"
+							* insert after each lines that match with regular expression
+								ex : lineaftermatch="text to match or regex"
+							* insert before the line number
+								ex : linebeforepos="23"
+							* insert after the line number
+								ex : lineafterpos="23"
+						- The second the separator. Must contain only --- (three minus characters)
+						- the next lines are the text to insert
+							* lines must not start and contain only a char "." (dot)
+							* lines must not contain exactly a triple dash (---)
+							* all lines that start with a space or tab char must be protected by a backslash (\)
+				D = delete line (delete all line that corresponding to the regular expression)
+			The file properties are :
+				mode of file : can be set on numeric or absolute mode. exemple 755, or 640, or 4550, or a+rwx, or u=rwx,go=.
+						- If not set and the file exist, the mode will be set on the same mode that the file is.
+						- If not set and file does not exist, the mode is 777 - 111 - UMASK.
+				user owner of file : set owner with user name. If not set, the current user is setting.
+				group owner of file : set group owner with group name. If not set, the group of current user is setting.
+				filename : the name of file in full path.
+		The section must be ended with line : [/LABEL]
+"
+}
+
+while getopts ":f:Hh" opt
+do
+        case $opt in
+                h )     usage
+                        exit 0 ;;
+		H )	fullusage
+			exit 0 ;;
+                f )     DESCFILE=$OPTARG ;;
+                *|\? )  usage
+                        exit 22 ;;
+        esac
+done
+
+# set all variables 
+TYPEMOD=""
+FILEN=""
+HEADERL="no"
+EDITTOCOMMIT="no"
+EXPRSEPFOUND="no"
+COMMIT_REPLACE="no"
+FOWN=""
+FGRP=""
+FMOD=""
+
+if [ "${FACTORY_PLATFORM}" = "SunOS" ]
+then
+	PATH=/usr/xpg4/bin/grep:$PATH
+	export PATH
+fi
+
+while read line
+do
+	# Evaluate new line to detect if header on end of section found, and set correct variable for each different case.
+	line=$(echo "$line" |sed -e 's/~/\\~/g')
+	eval $(echo "$line" | awk '{if ($0 ~ /^\[LABEL:.:.*]$/ ) {gsub(" ","",$0);gsub("	","",$0);split ($0,tmod,":");gsub("]$","",tmod[6]);
+						print "HEADERL=yes;TYPEMOD=" tmod[2] ";FMOD=" tmod[3]";FOWN=" tmod[4]";FGRP=" tmod[5]";FILEN=" tmod[6]}
+					 	else {if ($0 ~ /^\[\/LABEL]$/) {print "EDITTOCOMMIT=yes;HEADERL=no"}
+						else {print "EDITTOCOMMIT=no;HEADERL=no"} } }')
+
+	# continue to next line if  header line found (and parsed previously on eval).
+	if [ "${HEADERL}" = "yes" -o -z "${FILEN}" ]
+	then
+		if [ -z "${FILEN}" ]
+		then
+			# If filename is not set, unset all others parameters
+			FOWN=""
+			FGRP=""
+			FMOD=""
+		else
+			# Check if FILEN start with a tild ~
+			echo ${FILEN}|grep "^~" 2>&1 1>/dev/null
+			rc=$?
+			if [ $rc -eq 0 ]
+			then
+				if [ -z "${FOWN}" ]
+				then
+					FOWN=$(whoami)
+				fi
+				HDIR=$(eval echo ~${FOWN})
+				FILEN=$(echo ${FILEN} | sed "s,^~,$HDIR,")
+			else	
+				# Set owner for this file if not set (current user)
+				if [ -z "${FOWN}" ]
+				then
+					#if file exist, retrive user owner of file.
+					if [ -f "${FILEN}" ]
+					then
+						FOWN=$(ls -l ${FILEN}| awk '{print $3}')
+					else
+						FOWN=$(whoami)
+					fi
+				else
+					# check if the user exist on the system
+					id $FOWN 1>/dev/null 2>&1
+					if [ $? -ne 0 ]
+					then
+						FOWN=$(whoami)
+					fi
+				fi
+			fi
+			# Set group for this file if not set (current primary group of current user)
+			if [ -z "${FGRP}" ]
+			then
+				#if file exist, retrive group owner of file.
+                                if [ -f "${FILEN}" ]
+                                then
+                                        FGRP=$(ls -l ${FILEN}| awk '{print $4}')
+                                else
+					FGRP=$(id -gn $FOWN)
+				fi
+			else
+				# check if the group exist on the system
+				cat /etc/group |awk -F ":" '{print $1}' | grep "^${FGRP}$" 1>/dev/null 2>&1
+				if [ $? -ne 0 ]
+				then
+					FGRP=$(id -gn $FOWN)
+				fi
+			fi
+			# Set security mod of file if not set (based on current umask of current user)
+			if [ -z "${FMOD}" ]
+			then
+				# if the file exist, retrieve file right propertie on octal mode.
+                                if [ -f "${FILEN}" ]
+                                then
+                                        FMOD=$(ls -l ${FILEN} | awk '{out=000000000000;sub("^-","",$1)
+						if (substr($1,3,1) ~ /[sS]/) {out=100000000000 + out};
+						if (substr($1,6,1) ~ /[sS]/) {out=010000000000 + out};
+						if (substr($1,9,1) ~ /[tT]/) {out=001000000000 + out};
+						gsub ("[rwxst]","1",$1);gsub ("[ST-]","0",$1);out=out + $1;
+						printf "ibase=2;obase=8;%12d\n",out}' |bc)
+                                else
+					FMOD=$(echo "777 - 111 - $(umask)" |bc)
+				fi
+			fi
+		fi
+	
+		#echo "HEADER FOUND = $HEADERL : $FILEN : $TYPEMOD "
+		#echo "FILE PROP : $FMOD $FOWN $FGRP $FILEN"
+
+		# continue to next line after set all variables
+		continue
+	fi
+	
+	# Start to commit changes 
+	if [ "${EDITTOCOMMIT}" = "yes" -o "${COMMIT_REPLACE}" = "yes" ]
+	then
+                loginfo "Configure file : $FILEN (change type : $TYPEMOD)."
+		if [ "${TYPEMOD}" = "N" -o "${TYPEMOD}" = "n" ]
+		then
+			# Enter to new file mode. Create a new file. Replace if exist.
+			#
+			if [ $FACTORY_PLATFORM = "Linux" ]
+			then
+				ECHO_CMD="echo -e "
+			else
+				ECHO_CMD="echo"
+			fi
+
+			$ECHO_CMD "${LINESTOADD}" > $FACTORY_TMPDIR/read_ltn_file
+			while read ltn
+			do
+				# change each tab character by \t 
+				LTN2=$($ECHO_CMD "$ltn" | sed -e 's/	/\t/g')
+				# if mode new file is set to lower "n", all variables must be interpreted (all over the line) before create file.
+				if [ "${TYPEMOD}" = "n" ]
+				then
+					LTN2=$(echo "${LTN2}" | sed -e 's/\\\$/\$/g' -e 's/*/\\*/g' -e "s/[']/\\\'/g" -e 's/"/\\"/g' -e 's/#/\\#/g' -e 's/\t/\\\t/g')
+					LTN2=$(eval echo "${LTN2}")
+				fi
+			        if [ "${LINESTOADD2}" = "" ]
+                		then
+                        		LINESTOADD2="$LTN2"
+                		else
+                        		LINESTOADD2="$LINESTOADD2 \n$LTN2"
+				fi
+			done < $FACTORY_TMPDIR/read_ltn_file
+			$ECHO_CMD "$LINESTOADD2" > $FILEN
+			rm $FACTORY_TMPDIR/read_ltn_file
+			LINESTOADD=""
+			LINESTOADD2=""
+		elif [ "${TYPEMOD}" = "R" -a "${COMMIT_REPLACE}" = "yes" ]
+		then
+			# Enter to replace mode. Check if the first expression is empty. If it's empty, do nothing.
+			if [ "${EXPR1}" = "" ]
+			then
+       		                logwarn "   Do nothing for these replace parameters. Bad or empty first expression."
+                        	logwarn "   Value for replace : File name = $FILEN - EXPR1 = empty - EXPR2 = \"$EXPR2\""
+                        	logwarn "   See syntax of configuration file $DESCFILE "
+			else
+				FILE_MOD_REPLACE=$(add_temp_files file_mod_replace)
+				sed -e "s/$EXPR1/$EXPR2/" $FILEN > $FILE_MOD_REPLACE
+				mv $FILE_MOD_REPLACE $FILEN
+			fi
+			EXPR1=""
+			EXPR2=""
+			EXPRSEPFOUND="no"
+		elif [ "${TYPEMOD}" = "A" -o "${TYPEMOD}" = "a" ]
+		then
+			# enter on append mode. filter the line and verify if this line already exist.
+			#	(change tab to space character during the compare file)
+			#	if the file does not exist, it's created.
+			LINESTOAPPENDFILTERED=""
+			echo "${LINESTOAPPEND}" > $FACTORY_TMPDIR/read_lta_file
+			while read lta
+			do
+				# change each tab character by 3 spaces
+				LTA2=$(echo "$lta" | sed -e 's/	/   /g')
+				REGEXLTA=$(echo "${LTA2}")
+				# if mode append is set to lower "a", all variables must be interpreted (all over the line) before compare and add to file.
+				if [ "${TYPEMOD}" = "a" ]
+				then
+					REGEXLTA=$(echo "${REGEXLTA}" | sed -e 's/\\\$/\$/g' -e 's/*/\\*/g')
+					REGEXLTA=$(eval echo "${REGEXLTA}")
+					LTA2=$(echo "${LTA2}" | sed -e 's/\\\$/\$/g' -e 's/*/\\*/g')
+					LTA2=$(eval echo "${LTA2}")
+				fi
+				# make regular expression based on line to be added, to check if it exist on current file.
+				#   sed explaination :
+				#      1 - protect all meta characters +.*$/}{ on expression by adding a backslash before
+				#      2 - same that first but for character [
+				#      3 - same that first but for character ]
+				#      4 - replace one or more space character by expression [ ][ ]*
+				#      5 - add on end of  expression [ ]* for case when 1 or more space appear at the end of the line
+				REGEXLTA=$(echo "${REGEXLTA}" |sed -e 's/[+.*$/}{]/\\&/g;s/\[/\\&/g;s/\]/\\&/g;s/[ ][ ]*/[ ][ ]*/g;s/$/[ ]*/')
+				# Check if expression exist on file. Change tab by space on the fly for input file before applying egrep expression.
+				cat "$FILEN" | sed -e 's/[	]/ /g' | egrep "^${REGEXLTA}$" 1>/dev/null 2>&1
+				if [ $? -ne 0 -o "${REGEXLTA}" = "" ]
+				then
+			               	if [ "${LINESTOAPPENDFILTERED}" = "" ]
+                			then
+                        			LINESTOAPPENDFILTERED="$LTA2"
+                			else
+                        			LINESTOAPPENDFILTERED="$LINESTOAPPENDFILTERED \n$LTA2"
+                			fi
+				fi
+			done < $FACTORY_TMPDIR/read_lta_file
+			echo "$LINESTOAPPENDFILTERED" >> $FILEN
+			rm $FACTORY_TMPDIR/read_lta_file
+			LINESTOAPPEND=""
+		elif [ "${TYPEMOD}" = "D" ]
+		then
+			# Enter to delete mode. Delete each line that corresponding to all expression specified on egrep filter.
+			#	The line is delete often if part of expression  on line is found.
+			FILE_MOD_DELETE=$(add_temp_files file_mod_delete)
+			egrep -v "$EXPRFORDELETE" $FILEN > $FILE_MOD_DELETE
+			if [ $? -eq 0 -a -s $FILE_MOD_DELETE ]
+			then
+				cp -p ${FILEN} ${FILEN}.save
+				mv $FILE_MOD_DELETE $FILEN
+			else
+				logerror "Nothing deleted on file $FILEN"
+			fi
+	
+			EXPRFORDELETE=""
+                elif [ "${TYPEMOD}" = "R" -a "${COMMIT_REPLACE}" = "no" ]
+                then
+			# This case is only if mode replace is arrived to end of section in configuration file (eg : [/LABEL] tag found)
+			#
+			# Setting propertires of file according parameters set on header or with default values.
+			set_prop_file $FMOD $FOWN $FGRP $FILEN
+			#
+			EDITTOCOMMIT="no"
+			continue
+		elif [ "${TYPEMOD}" = "I" ]
+		then
+			if [ "${WORDINSMOD}" = "linebeforepos" ]
+			then
+				EX_CMDS=$(echo "${INSMODDEF}\ni")
+			elif [ "${WORDINSMOD}" = "lineafterpos" ]
+                        then
+				EX_CMDS=$(echo "${INSMODDEF}\na")
+			elif [ "${WORDINSMOD}" = "linebeforematch" ]
+                        then
+				EX_CMDS=$(echo "/${INSMODDEF}\ni")
+			elif [ "${WORDINSMOD}" = "lineaftermatch" ]
+                        then
+				EX_CMDS=$(echo "/${INSMODDEF}\na")
+			else
+				logerror "Error on insertion mode. No text inserted."
+			fi
+			EX_SCRIPT=$(echo "${EX_CMDS}\n${LINESTOINSERT}\n.\nwq!\n")
+			#echo "EX script : $EX_SCRIPT"
+			ex $FILEN << EOF_INS
+$EX_SCRIPT
+EOF_INS
+			FOUNDINSMODDEF=""
+			EX_CMDS=""
+			WORDINSMOD=""
+			INSMODDEF=""
+			LINESTOINSERT=""
+		else
+			# and error is found on change mode. Continue to next line until found start or end LABEL line (or end of conf file).
+			logerror "Unknow change type for file $FILEN. No change was applied."
+		fi
+	
+		# Setting propertires of file according parameters set on header or with default values.
+		set_prop_file $FMOD $FOWN $FGRP $FILEN
+
+		# Reset commit flags for replace and others change mod. 
+		#	(for replace mod, the script dont jump to next line, because the while is already on next line)
+		if [ "${COMMIT_REPLACE}" = "yes" ]
+                then
+			COMMIT_REPLACE="no"
+		else
+			# change commit flag to no only if  it's not on replace mode and commit_replace is in progress
+			EDITTOCOMMIT="no"
+			continue
+		fi
+	fi
+	
+	# Parse line for each different case of change.
+	if [ "${TYPEMOD}" = "N" -o "${TYPEMOD}" = "n" ]
+	then
+		# new file mode.
+		if [ "${LINESTOADD}" = "" ]
+		then
+			LINESTOADD="$line"
+		else
+			LINESTOADD="$LINESTOADD \n$line"
+		fi
+	elif [ "${TYPEMOD}" = "R" ]
+        then
+		# replace expression mode
+		if [ "${line}" = "---" ]
+		then
+			EXPRSEPFOUND=yes
+			continue
+		elif [ "${EXPRSEPFOUND}" = "yes" ]
+		then
+#			EXPR2=$(echo "$(echo "${line}")")
+			EXPR2=$(eval echo "${line}")
+			echo "$EXPR2" | grep "\[\/LABEL\]" 1>/dev/null 2>&1
+			if [ $? -ne 0 ]
+			then
+				COMMIT_REPLACE="yes"
+			else
+				EXPR1=""
+				EXPR2=""
+				EXPRSEPFOUND="no"
+				COMMIT_REPLACE="no"
+			fi
+		else
+			EXPR1=$(eval echo $line)
+		fi
+	elif [ "${TYPEMOD}" = "I" ]
+	then
+		# Insert mode
+		if [ "${line}" = "---"  ]
+		then
+			FOUNDINSMODDEF=yes
+			continue
+		elif [ "${FOUNDINSMODDEF}" = "yes" ]
+		then
+			if [ "${LINESTOINSERT}" = "" ]
+			then
+				LINESTOINSERT="${line}"
+			else
+				LINESTOINSERT="${LINESTOINSERT}\n${line}"
+			fi
+		else
+			WORDINSMOD=$(echo "${line}" | awk -F "=" '{print $1}')
+			INSMODDEF=$(echo "${line}" | sed -e "s/${WORDINSMOD}=//" -e "s!\/!\\\/!g")
+		fi
+        elif [ "${TYPEMOD}" = "A" -o "${TYPEMOD}" = "a" ]
+        then
+		# Append to file mode
+		if [ "${LINESTOAPPEND}" = "" ]
+                then
+			LINESTOAPPEND="$line"
+		else
+			LINESTOAPPEND="$LINESTOAPPEND \n$line"
+		fi
+        elif [ "${TYPEMOD}" = "D" ]
+        then
+		# Delete expression mode
+		if [ "${EXPRFORDELETE}" = "" ]
+		then
+			EXPRFORDELETE=$(eval echo "$line")
+		else
+			EXPRFORDELETE="${EXPRFORDELETE}|"$(eval echo "${line}")
+		fi
+	else
+		logerror "Bad mod specified in desc file. Abort process"
+		exit 20
+	fi
+
+done < $DESCFILE
