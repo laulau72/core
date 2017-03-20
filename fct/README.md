@@ -3,16 +3,6 @@
 
 # Table of Contents
 
-  * [functions.logs](#functions.logs)
-   * [setlogenv](#setlogenv)
-   * [msgprefix](#msgprefix)
-   * [loginfo](#loginfo)
-   * [logtolog](#logtolog)
-   * [logfromfile](#logfromfile)
-   * [logwarn](#logwarn)
-   * [logerror](#logerror)
-   * [logdebug](#logdebug)
-   * [fatalerror](#fatalerror)
   * [functions.cfg](#functions.cfg)
    * [findcfg](#findcfg)
    * [machinecfg](#machinecfg)
@@ -43,167 +33,20 @@
    * [set_screen_size](#set_screen_size)
    * [convertsize](#convertsize)
    * [whorun](#whorun)
+  * [functions.logs](#functions.logs)
+   * [setlogenv](#setlogenv)
+   * [msgprefix](#msgprefix)
+   * [loginfo](#loginfo)
+   * [logtolog](#logtolog)
+   * [logfromfile](#logfromfile)
+   * [logwarn](#logwarn)
+   * [logerror](#logerror)
+   * [logdebug](#logdebug)
+   * [fatalerror](#fatalerror)
 
 ---
 
 
-## functions.logs
-
- Set of functions to manage miscellaneous logs
-
----
-### setlogenv
-
- Setting the log environment variables.
- This function is called in the init part.
-
-#### Input:
-
- The following variable will change the contenent of the output variables
- * $FACTORY_AUDIT
- * FACTORY_LOGFILEXT (if set to "FULLDATE"
-
-#### Ouput:
-
- * FACTORY_LOGDIR
- * FACTORY_LOGFILE
-
----
-### msgprefix
-
- Output format messages depending of the varible setting (see input)
-
-#### Input:
-
- * $FACTORY_NOMSGPREFIX
- * $FACTORY_LOGFULLDATE
- * $FACTORY_LOGPROGNAME
- * $FACTORY_LOGPID
- * $FACTORY_LOGHOSTNAME
- * $FACTORY_LOGUSER
-
-#### Ouput:
-
- * 
-
----
-### loginfo
-
- Activate the log information in VARFACTORY_LOG (/var/factory/log) and on the screen 
-
-#### Input:
-
- * Comment to be written in the log
-
-#### Ouput:
-
- * Entry is added in $FACTORY_LOGFILE with the I: prefix
-
-#### Exemple:
-
- *  I: 12:46:58 Starting Centreon Core
-
----
-### logtolog
-
- Activate the log information in VARFACTORY_LOG (/var/factory/log)
-
-#### Input:
-
- * Comment to be written in the log
-
-#### Ouput:
-
- * Entry is added in $FACTORY_LOGFILE with the I: prefix
-
-#### Exemple:
-
- *  L: 12:46:58 Starting Centreon Core
-
----
-### logfromfile
-
-  Append log contents followed the informations level E as Error, I as Info, W as Warning, D as Debug function: logfromfile to the factory log (/var/factory/log)
-
-#### Input:
-
- * Comment to be written in the log
-
-#### Ouput:
-
- * Entry is added in $FACTORY_LOGFILE with the I: prefix
-
----
-### logwarn
-
- Transform any log line in level warning W
-
-#### Input:
-
- * Comment to be written in the log
-
-#### Ouput:
-
- * Entry is added in $FACTORY_LOGFILE with the W: prefix
-
-#### Exemple:
-
- *  W: 12:46:58 Centreon Core is already started
-
----
-### logerror
-
- Transform any log line in level error E
-
-#### Input:
-
- * Comment to be written in the log
-
-#### Ouput:
-
- * Entry is added in $FACTORY_LOGFILE with the E: prefix
-
-#### Exemple:
-
- *  E: 12:46:58 Centreon Core is not running
-
----
-### logdebug
-
- Transform any log line in level debug D
-
-#### Input:
-
- * Comment to be written in the log
-
-#### Ouput:
-
- * Entry is added in $FACTORY_LOGFILE with the D: prefix
-
-#### Exemple:
-
- *  D: 12:46:58 Centreon Core is started
-
----
-### fatalerror
-
- Transform any log line in level error E and exit
-
-#### Input:
-
- * exit code
- * Comment to be written in the log
-
-#### Ouput:
-
- * Entry is added in $FACTORY_LOGFILE with the E: prefix
- * exit $1
-
-#### Exemple:
-
- *  E: 12:46:58 Failed to start Centreon
-
----
 ## functions.cfg
 
  Set of functions to manage configuration files
@@ -551,5 +394,162 @@
 ### whorun
 
  Return muid:fuller conencted to teh server
+
+---
+## functions.logs
+
+ Set of functions to manage miscellaneous logs
+
+---
+### setlogenv
+
+ Setting the log environment variables.
+ This function is called in the init part.
+
+#### Input:
+
+ The following variable will change the contenent of the output variables
+ * $FACTORY_AUDIT
+ * FACTORY_LOGFILEXT (if set to "FULLDATE"
+
+#### Ouput:
+
+ * FACTORY_LOGDIR
+ * FACTORY_LOGFILE
+
+---
+### msgprefix
+
+ Output format messages depending of the varible setting (see input)
+
+#### Input:
+
+ * $FACTORY_NOMSGPREFIX
+ * $FACTORY_LOGFULLDATE
+ * $FACTORY_LOGPROGNAME
+ * $FACTORY_LOGPID
+ * $FACTORY_LOGHOSTNAME
+ * $FACTORY_LOGUSER
+
+#### Ouput:
+
+ * 
+
+---
+### loginfo
+
+ Activate the log information in VARFACTORY_LOG (/var/factory/log) and on the screen 
+
+#### Input:
+
+ * Comment to be written in the log
+
+#### Ouput:
+
+ * Entry is added in $FACTORY_LOGFILE with the I: prefix
+
+#### Exemple:
+
+ *  I: 12:46:58 Starting Centreon Core
+
+---
+### logtolog
+
+ Activate the log information in VARFACTORY_LOG (/var/factory/log)
+
+#### Input:
+
+ * Comment to be written in the log
+
+#### Ouput:
+
+ * Entry is added in $FACTORY_LOGFILE with the I: prefix
+
+#### Exemple:
+
+ *  L: 12:46:58 Starting Centreon Core
+
+---
+### logfromfile
+
+  Append log contents followed the informations level E as Error, I as Info, W as Warning, D as Debug function: logfromfile to the factory log (/var/factory/log)
+
+#### Input:
+
+ * Comment to be written in the log
+
+#### Ouput:
+
+ * Entry is added in $FACTORY_LOGFILE with the I: prefix
+
+---
+### logwarn
+
+ Transform any log line in level warning W
+
+#### Input:
+
+ * Comment to be written in the log
+
+#### Ouput:
+
+ * Entry is added in $FACTORY_LOGFILE with the W: prefix
+
+#### Exemple:
+
+ *  W: 12:46:58 Centreon Core is already started
+
+---
+### logerror
+
+ Transform any log line in level error E
+
+#### Input:
+
+ * Comment to be written in the log
+
+#### Ouput:
+
+ * Entry is added in $FACTORY_LOGFILE with the E: prefix
+
+#### Exemple:
+
+ *  E: 12:46:58 Centreon Core is not running
+
+---
+### logdebug
+
+ Transform any log line in level debug D
+
+#### Input:
+
+ * Comment to be written in the log
+
+#### Ouput:
+
+ * Entry is added in $FACTORY_LOGFILE with the D: prefix
+
+#### Exemple:
+
+ *  D: 12:46:58 Centreon Core is started
+
+---
+### fatalerror
+
+ Transform any log line in level error E and exit
+
+#### Input:
+
+ * exit code
+ * Comment to be written in the log
+
+#### Ouput:
+
+ * Entry is added in $FACTORY_LOGFILE with the E: prefix
+ * exit $1
+
+#### Exemple:
+
+ *  E: 12:46:58 Failed to start Centreon
 
 ---

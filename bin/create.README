@@ -56,8 +56,15 @@ for fsdir in `find $fdir -mindepth 1 -maxdepth 1 -type d |grep -v .git`
 do
 	tmpfile=/tmp/README.tmp
 	tocfile=/tmp/README.toc
-	rm $tmpfile
-	rm $tocfile
+	if [ -f $tmpfile ]
+	then
+		rm $tmpfile
+	fi
+	if [ -f $tocfile ]
+	then
+		rm $tocfile
+	fi
+
 	echo "
 # $(basename $fsdir) directory
 
