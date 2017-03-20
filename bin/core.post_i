@@ -35,7 +35,7 @@ fi
 chmod ugo+rwx /var/log/factory
 chmod ugo+rwx /var/log/factory/logs
 chmod ugo+rwx /var/log/factory/tmp
-chmod ugo+rwx /var/log/factory/audit
+chmod u+rwx,go-rwx /var/log/factory/audit
 
 . $FACTORY_ROOT/core/functions
 FACTORY_NOTTY=N 	# force STDOUT in NIM
