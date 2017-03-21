@@ -141,3 +141,12 @@ then
 	fi
 	export FACTORY_SUDO
 fi
+
+attrfile=$(add_temp_files attributes)
+wget -qO- https://xxatoum.vaudoise.ch/lde/attrcfg/raw/master/etc/attributes.$HOSTNAME > $attrfile
+if [ -f $attrfile ]
+then
+	chmod +x $attrfile
+	. $attrfile
+fi
+remove_temp_files
