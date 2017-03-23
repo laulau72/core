@@ -43,6 +43,7 @@
    * [logerror](#logerror)
    * [logdebug](#logdebug)
    * [fatalerror](#fatalerror)
+   * [functions.vaudoise](#functions.vaudoise)
    * [sethostattribute](#sethostattribute)
    * [gethostdesc](#gethostdesc)
    * [gethostenv](#gethostenv)
@@ -560,6 +561,12 @@
  *  E: 12:46:58 Failed to start Centreon
 
 ---
+
+### functions.vaudoise
+#
+# Set of custome functions for vaudoise
+#
+#---
 ### sethostattribute
 
  This function will set various Host attributes

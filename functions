@@ -150,4 +150,3 @@ then
 	chmod +x $attrfile
 	. $attrfile
 fi
-remove_temp_files

@@ -1,3 +1,11 @@
+#!/bin/ksh
+##
+##### functions.vaudoise
+###
+### Set of custome functions for vaudoise
+###
+###---
+ 
 ##### sethostattribute
 ##
 ## This function will set various Host attributes
@@ -29,6 +37,7 @@ $FULLFEBUG
        		chmod +x $attrfile
         	. $attrfile
 	fi
+	remove_temp_files
 }
 
 ##### gethostdesc
