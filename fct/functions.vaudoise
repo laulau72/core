@@ -1,0 +1,166 @@
+##### sethostattribute
+##
+## This function will set various Host attributes
+## Informations are read from the Git attrcfg repository
+##
+###### Input:
+##
+## * Hostname
+##
+###### Ouput:
+##
+## Set the following variables:
+## * FACTORY_ROLE
+## * FACTORY_ENV
+## * FACTORY_ARCH
+## * FACTORY_DESC
+## * FACTORY_LOCATION
+## * FACTORY_MW
+##
+##---
+function sethostattribute 
+{
+$FULLFEBUG
+	HOSTTOSET=$1
+	attrfile=$(add_temp_files attributes)
+	wget -qO- https://xxatoum.vaudoise.ch/lde/attrcfg/raw/master/etc/attributes.$HOSTTOSET > $attrfile
+	if [ -f $attrfile ]
+	then
+       		chmod +x $attrfile
+        	. $attrfile
+	fi
+}
+
+##### gethostdesc
+##
+## This function will output description attribute for a Host
+## Informations are read from the Git attrcfg repository
+##
+###### Input:
+##
+## * Hostname
+##
+###### Ouput:
+##
+## * Host Description
+##
+##---
+function gethostdesc
+{
+$FULLFEBUG
+	HOSTTOSET=$1
+	INFO=""
+	INFO=$(wget -qO- https://xxatoum.vaudoise.ch/lde/attrcfg/raw/master/etc/attributes.$HOSTTOSET |grep FACTORY_DESC|awk -F"=" '{print $2}'|sed 's/"//g')
+	if [ -z "$INFO" ]
+	then
+		return 1
+	else
+		echo $INFO
+		return 0
+	fi
+}
+
+##### gethostenv
+##
+## This function will output env attribute for a Host
+## Informations are read from the Git attrcfg repository
+##
+###### Input:
+##
+## * Hostname
+##
+###### Ouput:
+##
+## * Host Env
+##
+##---
+function gethostenv
+{
+$FULLFEBUG
+	HOSTTOSET=$1
+	wget -qO- https://xxatoum.vaudoise.ch/lde/attrcfg/raw/master/etc/attributes.$HOSTTOSET |grep FACTORY_ENV|awk -F"=" '{print $2}'|sed 's/"//g'
+}
+
+##### gethostrole
+##
+## This function will output role attribute for a Host
+## Informations are read from the Git attrcfg repository
+##
+###### Input:
+##
+## * Hostname
+##
+###### Ouput:
+##
+## * Host Role
+##
+##---
+function gethostrole
+{
+$FULLFEBUG
+	HOSTTOSET=$1
+	wget -qO- https://xxatoum.vaudoise.ch/lde/attrcfg/raw/master/etc/attributes.$HOSTTOSET |grep FACTORY_ROLE|awk -F"=" '{print $2}'|sed 's/"//g'
+}
+
+##### gethostarch
+##
+## This function will output architecture attribute for a Host
+## Informations are read from the Git attrcfg repository
+##
+###### Input:
+##
+## * Hostname
+##
+###### Ouput:
+##
+## * Host Arch
+##
+##---
+function gethostarch
+{
+$FULLFEBUG
+	HOSTTOSET=$1
+	wget -qO- https://xxatoum.vaudoise.ch/lde/attrcfg/raw/master/etc/attributes.$HOSTTOSET |grep FACTORY_ARCH|awk -F"=" '{print $2}'|sed 's/"//g'
+}
+
+##### gethostmw
+##
+## This function will output middleware attribute for a Host
+## Informations are read from the Git attrcfg repository
+##
+###### Input:
+##
+## * Hostname
+##
+###### Ouput:
+##
+## * Host  Middleware
+##
+##---
+function gethostmw
+{
+$FULLFEBUG
+	HOSTTOSET=$1
+	wget -qO- https://xxatoum.vaudoise.ch/lde/attrcfg/raw/master/etc/attributes.$HOSTTOSET |grep FACTORY_MW|awk -F"=" '{print $2}'|sed 's/"//g'
+}
+
+##### gethostlocation
+##
+## This function will output location attribute for a Host
+## Informations are read from the Git attrcfg repository
+##
+###### Input:
+##
+## * Hostname
+##
+###### Ouput:
+##
+## * Host Location
+##
+##---
+function gethostlocation
+{
+$FULLFEBUG
+	HOSTTOSET=$1
+	wget -qO- https://xxatoum.vaudoise.ch/lde/attrcfg/raw/master/etc/attributes.$HOSTTOSET |grep FACTORY_LOCATION|awk -F"=" '{print $2}'|sed 's/"//g'
+}

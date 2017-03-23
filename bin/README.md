@@ -5,8 +5,8 @@
 
    * [attributes.create.file](#attributes.create.file)
    * [configuremultiplefile](#configuremultiplefile)
-   * [create.README](#create.README)
    * [core.post_i](#core.post_i)
+   * [create.README](#create.README)
 
 ---
 
@@ -60,6 +60,13 @@
 	-f      Name of file that contain data & description of changes.
 
 ---
+### core.post_i
+
+ core.post_i
+
+ This script will setup directory and env variable after installing the core factoy
+
+---
 ###  create.README
 
   create.README -d factory_dir
@@ -74,12 +81,5 @@
 
  * 0    Successful
  * 22   usage
-
----
-### core.post_i
-
- core.post_i
-
- This script will setup directory and env variable after installing the core factoy
 
 ---

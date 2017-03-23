@@ -35,6 +35,7 @@
 . $FACTORY_ROOT/core/fct/functions.divers
 . $FACTORY_ROOT/core/fct/functions.cfg
 . $FACTORY_ROOT/core/fct/functions.menu
+. $FACTORY_ROOT/core/fct/functions.vaudoise
 
 #### Init
 ##

@@ -43,6 +43,13 @@
    * [logerror](#logerror)
    * [logdebug](#logdebug)
    * [fatalerror](#fatalerror)
+   * [sethostattribute](#sethostattribute)
+   * [gethostdesc](#gethostdesc)
+   * [gethostenv](#gethostenv)
+   * [gethostrole](#gethostrole)
+   * [gethostarch](#gethostarch)
+   * [gethostmw](#gethostmw)
+   * [gethostlocation](#gethostlocation)
 
 ---
 
@@ -551,5 +558,109 @@
 #### Exemple:
 
  *  E: 12:46:58 Failed to start Centreon
+
+---
+### sethostattribute
+
+ This function will set various Host attributes
+ Informations are read from the Git attrcfg repository
+
+#### Input:
+
+ * Hostname
+
+#### Ouput:
+
+ Set the following variables:
+ * FACTORY_ROLE
+ * FACTORY_ENV
+ * FACTORY_ARCH
+ * FACTORY_DESC
+ * FACTORY_LOCATION
+ * FACTORY_MW
+
+---
+### gethostdesc
+
+ This function will output description attribute for a Host
+ Informations are read from the Git attrcfg repository
+
+#### Input:
+
+ * Hostname
+
+#### Ouput:
+
+ * Host Description
+
+---
+### gethostenv
+
+ This function will output env attribute for a Host
+ Informations are read from the Git attrcfg repository
+
+#### Input:
+
+ * Hostname
+
+#### Ouput:
+
+ * Host Env
+
+---
+### gethostrole
+
+ This function will output role attribute for a Host
+ Informations are read from the Git attrcfg repository
+
+#### Input:
+
+ * Hostname
+
+#### Ouput:
+
+ * Host Role
+
+---
+### gethostarch
+
+ This function will output architecture attribute for a Host
+ Informations are read from the Git attrcfg repository
+
+#### Input:
+
+ * Hostname
+
+#### Ouput:
+
+ * Host Arch
+
+---
+### gethostmw
+
+ This function will output middleware attribute for a Host
+ Informations are read from the Git attrcfg repository
+
+#### Input:
+
+ * Hostname
+
+#### Ouput:
+
+ * Host  Middleware
+
+---
+### gethostlocation
+
+ This function will output location attribute for a Host
+ Informations are read from the Git attrcfg repository
+
+#### Input:
+
+ * Hostname
+
+#### Ouput:
+
+ * Host Location
 
 ---
