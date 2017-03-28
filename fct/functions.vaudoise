@@ -1,10 +1,10 @@
 #!/bin/ksh
+
+#### functions.vaudoise
 ##
-##### functions.vaudoise
-###
-### Set of custome functions for vaudoise
-###
-###---
+## Set of custome functions for vaudoise
+##
+##---
  
 ##### sethostattribute
 ##
@@ -60,6 +60,7 @@ $FULLFEBUG
 	HOSTTOSET=$1
 	INFO=""
 	INFO=$(wget -qO- https://xxatoum.vaudoise.ch/lde/attrcfg/raw/master/etc/attributes.$HOSTTOSET |grep FACTORY_DESC|awk -F"=" '{print $2}'|sed 's/"//g')
+#	INFO=$( /usr/share/centrifydc/bin/ldapsearch -m  -Q -h vaudoise.ch -LLL -p 389 -b "dc=vaudoise,dc=ch"  "(CN=sguihs1)" description |grep description  |awk -F":" '{print $2}' |sed 's/^ *//g')
 	if [ -z "$INFO" ]
 	then
 		return 1
@@ -87,7 +88,15 @@ function gethostenv
 {
 $FULLFEBUG
 	HOSTTOSET=$1
-	wget -qO- https://xxatoum.vaudoise.ch/lde/attrcfg/raw/master/etc/attributes.$HOSTTOSET |grep FACTORY_ENV|awk -F"=" '{print $2}'|sed 's/"//g'
+	INFO=""
+        INFO=$(wget -qO- https://xxatoum.vaudoise.ch/lde/attrcfg/raw/master/etc/attributes.$HOSTTOSET |grep FACTORY_ENV|awk -F"=" '{print $2}'|sed 's/"//g')
+	if [ -z "$INFO" ]
+	then
+		return 1
+	else
+		echo $INFO
+		return 0
+	fi
 }
 
 ##### gethostrole
@@ -108,7 +117,15 @@ function gethostrole
 {
 $FULLFEBUG
 	HOSTTOSET=$1
-	wget -qO- https://xxatoum.vaudoise.ch/lde/attrcfg/raw/master/etc/attributes.$HOSTTOSET |grep FACTORY_ROLE|awk -F"=" '{print $2}'|sed 's/"//g'
+	INFO=""
+        INFO=$(wget -qO- https://xxatoum.vaudoise.ch/lde/attrcfg/raw/master/etc/attributes.$HOSTTOSET |grep FACTORY_ROLE|awk -F"=" '{print $2}'|sed 's/"//g')
+	if [ -z "$INFO" ]
+	then
+		return 1
+	else
+		echo $INFO
+		return 0
+	fi
 }
 
 ##### gethostarch
@@ -129,7 +146,15 @@ function gethostarch
 {
 $FULLFEBUG
 	HOSTTOSET=$1
-	wget -qO- https://xxatoum.vaudoise.ch/lde/attrcfg/raw/master/etc/attributes.$HOSTTOSET |grep FACTORY_ARCH|awk -F"=" '{print $2}'|sed 's/"//g'
+	INFO=""
+        INFO=$(wget -qO- https://xxatoum.vaudoise.ch/lde/attrcfg/raw/master/etc/attributes.$HOSTTOSET |grep FACTORY_ARCH|awk -F"=" '{print $2}'|sed 's/"//g')
+	if [ -z "$INFO" ]
+	then
+		return 1
+	else
+		echo $INFO
+		return 0
+	fi
 }
 
 ##### gethostmw
@@ -150,7 +175,15 @@ function gethostmw
 {
 $FULLFEBUG
 	HOSTTOSET=$1
-	wget -qO- https://xxatoum.vaudoise.ch/lde/attrcfg/raw/master/etc/attributes.$HOSTTOSET |grep FACTORY_MW|awk -F"=" '{print $2}'|sed 's/"//g'
+	INFO=""
+        INFO=$(wget -qO- https://xxatoum.vaudoise.ch/lde/attrcfg/raw/master/etc/attributes.$HOSTTOSET |grep FACTORY_MW|awk -F"=" '{print $2}'|sed 's/"//g')
+	if [ -z "$INFO" ]
+	then
+		return 1
+	else
+		echo $INFO
+		return 0
+	fi
 }
 
 ##### gethostlocation
@@ -171,5 +204,13 @@ function gethostlocation
 {
 $FULLFEBUG
 	HOSTTOSET=$1
-	wget -qO- https://xxatoum.vaudoise.ch/lde/attrcfg/raw/master/etc/attributes.$HOSTTOSET |grep FACTORY_LOCATION|awk -F"=" '{print $2}'|sed 's/"//g'
+	INFO=""
+	INFO=$(wget -qO- https://xxatoum.vaudoise.ch/lde/attrcfg/raw/master/etc/attributes.$HOSTTOSET |grep FACTORY_LOCATION|awk -F"=" '{print $2}'|sed 's/"//g')
+	if [ -z "$INFO" ]
+	then
+		return 1
+	else
+		echo $INFO
+		return 0
+	fi
 }

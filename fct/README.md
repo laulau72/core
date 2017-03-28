@@ -3,9 +3,6 @@
 
 # Table of Contents
 
-  * [functions.cfg](#functions.cfg)
-   * [findcfg](#findcfg)
-   * [machinecfg](#machinecfg)
   * [functions.divers](#functions.divers)
    * [rmifexists](#rmifexists)
    * [fatalcheckenv](#fatalcheckenv)
@@ -43,7 +40,7 @@
    * [logerror](#logerror)
    * [logdebug](#logdebug)
    * [fatalerror](#fatalerror)
-   * [functions.vaudoise](#functions.vaudoise)
+  * [functions.vaudoise](#functions.vaudoise)
    * [sethostattribute](#sethostattribute)
    * [gethostdesc](#gethostdesc)
    * [gethostenv](#gethostenv)
@@ -51,82 +48,13 @@
    * [gethostarch](#gethostarch)
    * [gethostmw](#gethostmw)
    * [gethostlocation](#gethostlocation)
+  * [functions.cfg](#functions.cfg)
+   * [findcfg](#findcfg)
+   * [machinecfg](#machinecfg)
 
 ---
 
 
-## functions.cfg
-
- Set of functions to manage configuration files
-
----
-### findcfg
-
- Output, in order,  the list of Confguration
-
-#### Input:
-
- * -M			Config is based on machine configuration
- * -U			Config is based on user configuration 
- * -m hostname	Config is based on hostname arg
- * -u username	Config is based on username arg
- * -r 		Reverse order of the Config
-
-#### Ouput:
-
- * List of Config
-
-#### Retur code:
-
- *  0:                        Ok
-
----
-### machinecfg
-
- Descritpion
-
-	Order of criteria for configuration file search
-	$MACHINE
-	-$FACTORY_ROLE$FACTORY_LOCATION$FACTORY_CATEGORY
-	--$FACTORY_ROLE$FACTORY_LOCATION$FACTORY_ENV
-	---$FACTORY_ROLE$FACTORY_CATEGORY
-	----$FACTORY_ROLE$FACTORY_ENV
-	-----$FACTORY_ROLE$FACTORY_LOCATION
-	------$FACTORY_ROLE
-	-------$FACTORY_MW$FACTORY_CATEGORY
-	--------$FACTORY_MW$FACTORY_ENV
-	---------$FACTORY_MW
-	----------$FACTORY_LOCATION$FACTORY_DATACENTER$FACTORY_CATEGORY
-	-----------$FACTORY_LOCATION$FACTORY_DATACENTER$FACTORY_ENV
-	------------$FACTORY_LOCATION$FACTORY_ARCH$FACTORY_CATEGORY
-	-------------$FACTORY_LOCATION$FACTORY_ARCH$FACTORY_ENV
-	--------------$FACTORY_LOCATION$FACTORY_CATEGORY
-	---------------$FACTORY_LOCATION$FACTORY_ENV
-	----------------$FACTORY_ARCH$FACTORY_LOCATION$FACTORY_DATACENTER
-	-----------------$FACTORY_ARCH$FACTORY_LOCATION
-	------------------$FACTORY_LOCATION$FACTORY_DATACENTER
-	-------------------$FACTORY_LOCATION 
-	--------------------$FACTORY_ARCH$FACTORY_CATEGORY
-	---------------------$FACTORY_ARCH$FACTORY_ENV
-	----------------------$FACTORY_ARCH
-	-----------------------$FACTORY_CATEGORY
-	------------------------$FACTORY_ENV
-	-------------------------default
-
-#### Input:
-
- * Machine_Name
-
-#### Ouput:
-
- * output
-
-#### Return code:
-
- *  0:                        Ok
- *  other:                  Error
-
----
 ## functions.divers
 
  Set of miscellaneous functions
@@ -561,12 +489,11 @@
  *  E: 12:46:58 Failed to start Centreon
 
 ---
+## functions.vaudoise
 
-### functions.vaudoise
-#
-# Set of custome functions for vaudoise
-#
-#---
+ Set of custome functions for vaudoise
+
+---
 ### sethostattribute
 
  This function will set various Host attributes
@@ -669,5 +596,77 @@
 #### Ouput:
 
  * Host Location
+
+---
+## functions.cfg
+
+ Set of functions to manage configuration files
+
+---
+### findcfg
+
+ Output, in order,  the list of Confguration
+
+#### Input:
+
+ * -M			Config is based on machine configuration
+ * -U			Config is based on user configuration 
+ * -m hostname	Config is based on hostname arg
+ * -u username	Config is based on username arg
+ * -r 		Reverse order of the Config
+
+#### Ouput:
+
+ * List of Config
+
+#### Retur code:
+
+ *  0:                        Ok
+
+---
+### machinecfg
+
+ Descritpion
+
+	Order of criteria for configuration file search
+	$MACHINE
+	-$FACTORY_ROLE$FACTORY_LOCATION$FACTORY_CATEGORY
+	--$FACTORY_ROLE$FACTORY_LOCATION$FACTORY_ENV
+	---$FACTORY_ROLE$FACTORY_CATEGORY
+	----$FACTORY_ROLE$FACTORY_ENV
+	-----$FACTORY_ROLE$FACTORY_LOCATION
+	------$FACTORY_ROLE
+	-------$FACTORY_MW$FACTORY_CATEGORY
+	--------$FACTORY_MW$FACTORY_ENV
+	---------$FACTORY_MW
+	----------$FACTORY_LOCATION$FACTORY_DATACENTER$FACTORY_CATEGORY
+	-----------$FACTORY_LOCATION$FACTORY_DATACENTER$FACTORY_ENV
+	------------$FACTORY_LOCATION$FACTORY_ARCH$FACTORY_CATEGORY
+	-------------$FACTORY_LOCATION$FACTORY_ARCH$FACTORY_ENV
+	--------------$FACTORY_LOCATION$FACTORY_CATEGORY
+	---------------$FACTORY_LOCATION$FACTORY_ENV
+	----------------$FACTORY_ARCH$FACTORY_LOCATION$FACTORY_DATACENTER
+	-----------------$FACTORY_ARCH$FACTORY_LOCATION
+	------------------$FACTORY_LOCATION$FACTORY_DATACENTER
+	-------------------$FACTORY_LOCATION 
+	--------------------$FACTORY_ARCH$FACTORY_CATEGORY
+	---------------------$FACTORY_ARCH$FACTORY_ENV
+	----------------------$FACTORY_ARCH
+	-----------------------$FACTORY_CATEGORY
+	------------------------$FACTORY_ENV
+	-------------------------default
+
+#### Input:
+
+ * Machine_Name
+
+#### Ouput:
+
+ * output
+
+#### Return code:
+
+ *  0:                        Ok
+ *  other:                  Error
 
 ---
